@@ -1,0 +1,105 @@
+﻿@page "/create-employee"
+@using SkillsDatabase
+@using System
+@inject NavigationManager nav
+
+<h3>Mitarbeiter erfassen</h3>
+
+<div>
+    <table>
+        <tr>
+            <td>Vorname:</td>
+            <td>
+                <input type="text"  name="fname" @bind-value="FirstName" @bind-value:event="oninput"/>
+            </td>
+        </tr>
+        <tr>
+            <td>Nachname:</td>
+            <td>
+                <input type="text" name="lname" @bind-value="LastName" @bind-value:event="oninput" />
+            </td>
+        </tr>
+        <tr>
+            <td>Geburtsdatum:</td>
+            <td>
+                <input type="date" name="dateofbirth" @bind-value="DateOfBirth" @bind-value:event="oninput" />
+            </td>
+        </tr> 
+    </table>
+</div>
+
+<div>
+    <table>
+        <tr>
+            <td>
+                <SkillsComponent NumberOfSkills=@N skillLevelInputListParameter=@StatischeKlasse.skillLevelInputList  />
+            </td>
+            <td>
+                <table>
+                    <tr>
+                        <td><button name="addskill" @onclick="AddSkill">Hinzufügen</button></td>
+                    </tr>
+                    <tr>
+                        <td><button name="save" @onclick="SaveEmployee">Speichern</button></td>
+                    </tr>
+                    <tr>
+                        <td><button name="goback">Abbrechen</button></td>
+                    </tr>
+                    
+                </table>
+            </td>
+        </tr>
+    </table>
+</div>
+
+
+@code {
+    string FirstName;
+    string LastName;
+    DateTime DateOfBirth = new DateTime();
+
+    int N = 0;
+
+
+
+    
+
+    protected override async void OnInitialized()
+    {
+
+        base.OnInitialized();
+
+        await StartupProgram.Main(Array.Empty<string>());
+
+
+    }
+
+    private void AddSkill()
+    {
+        N++;
+        StatischeKlasse.skillLevelInputList.Item1.Add(string.Empty);
+        StatischeKlasse.skillLevelInputList.Item2.Add(ProficiencyLevel.Basic);
+
+    }
+
+    private async Task SaveEmployee()
+    {
+        Console.WriteLine(FirstName + LastName + DateOfBirth);
+        SkillsDatabase.Program.CreateEmployee(FirstName, LastName, DateOfBirth);
+
+       
+
+        var context = new SkillsContext();
+        @for (int i = 0; i < StatischeKlasse.skillLevelInputList.Item1.Count; i++)
+        {
+            SkillsDatabase.Program.CreateProficiency(StatischeKlasse.skillLevelInputList.Item1[i], StatischeKlasse.skillLevelInputList.Item2[i], context.VisibleEmployees.Single(e => e.FirstName == FirstName && e.LastName == LastName && e.Birthday == DateOfBirth));
+        }
+
+
+
+        nav.NavigateTo("");
+
+    }
+
+}
+ 

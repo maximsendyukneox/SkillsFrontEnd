@@ -1,0 +1,57 @@
+﻿@page "/search-employee"
+@using SkillsDatabase
+<h3>Mitarbeiter suchen</h3>
+
+<p>
+    Name:
+</p>
+
+<input type="text" name="searchbyname"/>
+
+<div>
+    <table>
+        
+        <thead>
+            <tr>
+                <th>Vorname</th>
+                <th>Nachname</th>
+                <th>Geburtsdatum</th>
+                <th/>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach(var e in SearchResult)
+        {
+            <tr>
+                <td>
+                    @e.FirstName
+                </td>
+                <td>
+                    @e.LastName
+                </td>
+                <td>
+                    @e.Birthday
+                </td>
+                <td>
+                    <button type="button" >
+                            <img src="~\Images\Icons\edit.png"> @*<a target="_blank" href="https://icons8.com/icon/102550/edit">Edit</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a>*@
+                    </button> 
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>
+
+
+
+@code {
+    List<Employee> SearchResult = new List<Employee>();
+
+    protected override async void OnInitialized()
+    {
+        base.OnInitialized();
+
+
+    }
+}

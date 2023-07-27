@@ -1,0 +1,97 @@
+﻿@page "/edit-employee"
+@using SkillsDatabase
+<h3>Mitarbeiterdaten ändern</h3>
+
+<div>
+    <table>
+        <tr>
+            <td>Vorname:</td>
+            <td>
+                <input type="text" name="fname" />
+            </td>
+        </tr>
+        <tr>
+            <td>Nachname:</td>
+            <td>
+                <input type="text" name="lname" />
+            </td>
+        </tr>
+        <tr>
+            <td>Geburtsdatum:</td>
+            <td>
+                <input type="date" name="dateofbirth" />
+            </td>
+        </tr>
+    </table>
+</div>
+
+<div>
+    <table>
+        <tr>
+            <td><button name="deleteemployee">Mitarbeiter löschen</button></td>
+        </tr>
+    </table>
+</div>
+
+<div>
+    <table>
+        <tr>
+            <td>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Kenntnis</th>
+                            <th>Stufe</th>
+                            <th/>
+                            <th/>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach(var proficiency in proficiencies)
+                        {
+                            
+                            <tr>
+                                <td>
+                                    <input type="text" autocomplete="on" name="skillname" @bind-value="proficiency.Skill.Name" />
+                                </td>
+                                <td>
+                                    <InputSelect @bind-Value="proficiency.Level">
+                                            @foreach (var l in Enum.GetValues(typeof(ProficiencyLevel)))
+                                            {
+                                            <option value="@l">@l</option>
+                                            }
+                                    </InputSelect>
+                                </td>
+                                
+                                <td>
+                                    <img src="~\Images\Icons\delete.png"> @*<a target="_blank" href="https://icons8.com/icon/102550/remove">Delete</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a>*@
+                                </td>
+                            </tr>
+                             
+                        }
+                    </tbody>
+                </table>
+            </td>
+            <td>
+                <table>
+                    <tr>
+                        <td><button name="addskill">Kenntnis hinzufügen</button></td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</div>
+
+@code {
+
+    List<Proficiency> proficiencies = new List<Proficiency>();
+
+    protected override async void OnInitialized()
+    {
+        base.OnInitialized();
+
+    }
+
+}
