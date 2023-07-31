@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
+	<RazorLanguageVersion>7</RazorLanguageVersion>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
@@ -11,7 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\skillsdotnet7backend\Richard.csproj" />
+    <ProjectReference Include="..\skillsdotnet7\Richard.csproj" />
   </ItemGroup>
 
   <ItemGroup>

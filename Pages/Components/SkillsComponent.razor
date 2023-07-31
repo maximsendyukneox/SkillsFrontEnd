@@ -8,25 +8,28 @@
         </tr>
     </thead>
     <tbody>
+        @{
+            sli = StatischeKlasse.skillLevelInputList;
+        }
         @for (int i = 0; i < NumberOfSkills; i++)
         {
-            
+            StatischeKlasse.i = i;
             <tr>
                 <td>
                     
                     <br/>
 
 
-                    <input type="text" @bind-value="skillLevelInputListParameter.Item1[i]" />
+                    <input type="text" @bind-value="SkillName" />
                      
                 </td>
                 <td>
-                    <select >
-                        @foreach (var l in Enum.GetValues(typeof(ProficiencyLevel)))
+                    <InputSelect @bind-Value="SkillLevel">
+                        @foreach (var l in Enum.GetValues<ProficiencyLevel>())
                         {
                             <option value="@l">@l</option>
                         }
-                    </select>
+                    </InputSelect>
                 </td>
             </tr>
         }
@@ -34,21 +37,11 @@
 </table>
 
 @code {
-
-
     [Parameter]
     public int NumberOfSkills { get; set; }
-    [Parameter]
-    public Tuple<List<String?>, List<ProficiencyLevel>> skillLevelInputListParameter { get; set; }
 
-    string text;
+    private Tuple<List<string>, List<ProficiencyLevel>> sli = StatischeKlasse.skillLevelInputList;
 
-    string[] s = new string[3];
-
-    private Task SetAsync(string value) {  StatischeKlasse.setInput(value); return Task.CompletedTask; }
-
-    private string GetValue { get { return StatischeKlasse.getInput(); } }
-
+    private string SkillName { get { return StatischeKlasse.skillLevelInputList.Item1[StatischeKlasse.i]; } set { StatischeKlasse.skillLevelInputList.Item1[StatischeKlasse.i] = value; } }
+    private ProficiencyLevel SkillLevel { get { return StatischeKlasse.skillLevelInputList.Item2[StatischeKlasse.i]; } set { StatischeKlasse.skillLevelInputList.Item2[StatischeKlasse.i] = value; } }
 }
-
-

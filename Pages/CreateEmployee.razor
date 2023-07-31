@@ -32,12 +32,12 @@
     <table>
         <tr>
             <td>
-                <SkillsComponent NumberOfSkills=@N skillLevelInputListParameter=@StatischeKlasse.skillLevelInputList  />
+                <SkillsComponent NumberOfSkills=@StatischeKlasse.N />
             </td>
             <td>
                 <table>
                     <tr>
-                        <td><button name="addskill" @onclick="AddSkill">Hinzufügen</button></td>
+                        <td><button name="addskill" @onclick="AddSkill">Neuen Skill hinzufügen</button></td>
                     </tr>
                     <tr>
                         <td><button name="save" @onclick="SaveEmployee">Speichern</button></td>
@@ -54,31 +54,20 @@
 
 
 @code {
-    string FirstName;
-    string LastName;
-    DateTime DateOfBirth = new DateTime();
-
-    int N = 0;
-
-
-
-    
-
-    protected override async void OnInitialized()
-    {
-
-        base.OnInitialized();
-
-        await StartupProgram.Main(Array.Empty<string>());
-
-
-    }
+    string FirstName = String.Empty;
+    string LastName = String.Empty;
+    DateTime DateOfBirth = new DateTime(2000, 1, 1);
 
     private void AddSkill()
     {
-        N++;
+        Console.WriteLine("AddSkill: " + FirstName + ", " + LastName + ", " + DateOfBirth);
+        Console.WriteLine("AddSkill: " + StatischeKlasse.N);
+        StatischeKlasse.N++;
         StatischeKlasse.skillLevelInputList.Item1.Add(string.Empty);
         StatischeKlasse.skillLevelInputList.Item2.Add(ProficiencyLevel.Basic);
+        Console.WriteLine("AddSkill: " + StatischeKlasse.N);
+        Console.WriteLine("AddSkill StatischeKlasse.skillLevelInputList.Item1.Count: " + StatischeKlasse.skillLevelInputList.Item1.Count);
+        Console.WriteLine("AddSkill StatischeKlasse.skillLevelInputList.Item2.Count: " + StatischeKlasse.skillLevelInputList.Item2.Count);
 
     }
 
@@ -89,10 +78,16 @@
 
        
 
-        var context = new SkillsContext();
-        @for (int i = 0; i < StatischeKlasse.skillLevelInputList.Item1.Count; i++)
+        
+        @for (int i = 0; i < StatischeKlasse.N; StatischeKlasse.i = i++)
         {
-            SkillsDatabase.Program.CreateProficiency(StatischeKlasse.skillLevelInputList.Item1[i], StatischeKlasse.skillLevelInputList.Item2[i], context.VisibleEmployees.Single(e => e.FirstName == FirstName && e.LastName == LastName && e.Birthday == DateOfBirth));
+            if (i == 0)
+            {
+                Console.WriteLine("SaveEmployee StatischeKlasse.N: " + StatischeKlasse.N);
+                Console.WriteLine("SaveEmployee StatischeKlasse.skillLevelInputList.Item1.Count: " + StatischeKlasse.skillLevelInputList.Item1.Count);
+                Console.WriteLine("SaveEmployee StatischeKlasse.skillLevelInputList.Item2.Count: " + StatischeKlasse.skillLevelInputList.Item2.Count);
+            }
+            SkillsDatabase.Program.CreateProficiency(StatischeKlasse.skillLevelInputList.Item1[i], StatischeKlasse.skillLevelInputList.Item2[i], StatischeKlasse.context.VisibleEmployees.Single(e => e.FirstName == FirstName && e.LastName == LastName && e.Birthday == DateOfBirth));
         }
 
 

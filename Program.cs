@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
+using SkillsDatabase;
 using SkillsFrontEnd.Data;
 
 
@@ -8,16 +9,17 @@ namespace SkillsFrontEnd
     public class Program
     {
 
-        public static int i;
-
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
+            await StartupProgram.Main(Array.Empty<string>());
+            StatischeKlasse.context = new();
+
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
             builder.Services.AddRazorPages();
             builder.Services.AddServerSideBlazor();
-            builder.Services.AddSingleton<WeatherForecastService>();
+            //builder.Services.AddSingleton<WeatherForecastService>();
             
 
             var app = builder.Build();

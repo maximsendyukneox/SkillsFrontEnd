@@ -57,7 +57,7 @@
                                 </td>
                                 <td>
                                     <InputSelect @bind-Value="proficiency.Level">
-                                            @foreach (var l in Enum.GetValues(typeof(ProficiencyLevel)))
+                                            @foreach (var l in Enum.GetValues<ProficiencyLevel>())
                                             {
                                             <option value="@l">@l</option>
                                             }
