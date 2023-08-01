@@ -5,7 +5,7 @@ VisualStudioVersion = 17.6.33829.357
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SkillsFrontEnd", "SkillsFrontEnd.csproj", "{DF9BBFC4-F1DC-43E1-8736-606382D8B143}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Richard", "..\skillsdotnet7\Richard.csproj", "{25E471FB-BF77-42A5-A5E9-678B6A326C7C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SkillsBackend", "..\skillsdotnet7\SkillsBackend.csproj", "{25E471FB-BF77-42A5-A5E9-678B6A326C7C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

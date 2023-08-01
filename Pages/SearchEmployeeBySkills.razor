@@ -57,7 +57,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach(var prof in emp.GetProficiencies())
+                                    @foreach (var prof in context.GetProficiencies(emp))
                                     {
                                         <tr>
                                             <td>@prof.Skill.Name</td>
@@ -75,6 +75,7 @@
 </table>
 
 @code {
+    SkillsDbContext context = Program.dbContextFactory.newContext();
     List<Skill> requiredSkills = new List<Skill>();
     List<ProficiencyLevel> requiredLevels = new List<ProficiencyLevel>();
 

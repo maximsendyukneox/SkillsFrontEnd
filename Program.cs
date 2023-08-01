@@ -8,13 +8,15 @@ namespace SkillsFrontEnd
 {
     public class Program
     {
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor.
+        public static SkillsDbContextFactory dbContextFactory { get; private set; } //TODO: Refactor static variable into WebApplication service
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor.
 
-        public static async Task Main(string[] args)
+        public static void Main(string[] args)
         {
-            await StartupProgram.Main(Array.Empty<string>());
-            StatischeKlasse.context = new();
-
             var builder = WebApplication.CreateBuilder(args);
+
+            dbContextFactory = new SkillsDbContextFactory();
 
             // Add services to the container.
             builder.Services.AddRazorPages();

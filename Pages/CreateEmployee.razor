@@ -32,7 +32,7 @@
     <table>
         <tr>
             <td>
-                <SkillsComponent NumberOfSkills=@StatischeKlasse.N />
+                <SkillsComponent proficienciesDTO=@proficienciesDTO />
             </td>
             <td>
                 <table>
@@ -43,7 +43,7 @@
                         <td><button name="save" @onclick="SaveEmployee">Speichern</button></td>
                     </tr>
                     <tr>
-                        <td><button name="goback">Abbrechen</button></td>
+                        <td><button name="abort" @onClick="nav.NavigateTo(String.Empty)">Abbrechen</button></td>
                     </tr>
                     
                 </table>
@@ -54,6 +54,7 @@
 
 
 @code {
+    List<ProficiencyBaseDTO> proficienciesDTO = new();
     string FirstName = String.Empty;
     string LastName = String.Empty;
     DateTime DateOfBirth = new DateTime(2000, 1, 1);
@@ -61,39 +62,23 @@
     private void AddSkill()
     {
         Console.WriteLine("AddSkill: " + FirstName + ", " + LastName + ", " + DateOfBirth);
-        Console.WriteLine("AddSkill: " + StatischeKlasse.N);
-        StatischeKlasse.N++;
-        StatischeKlasse.skillLevelInputList.Item1.Add(string.Empty);
-        StatischeKlasse.skillLevelInputList.Item2.Add(ProficiencyLevel.Basic);
-        Console.WriteLine("AddSkill: " + StatischeKlasse.N);
-        Console.WriteLine("AddSkill StatischeKlasse.skillLevelInputList.Item1.Count: " + StatischeKlasse.skillLevelInputList.Item1.Count);
-        Console.WriteLine("AddSkill StatischeKlasse.skillLevelInputList.Item2.Count: " + StatischeKlasse.skillLevelInputList.Item2.Count);
-
+        proficienciesDTO.Add(new(string.Empty, ProficiencyLevel.Basic));
     }
 
     private async Task SaveEmployee()
     {
         Console.WriteLine(FirstName + LastName + DateOfBirth);
-        SkillsDatabase.Program.CreateEmployee(FirstName, LastName, DateOfBirth);
 
-       
+        SkillsDbContext context = Program.dbContextFactory.newContext();
 
+        var employee = context.CreateEmployee(FirstName, LastName, DateOfBirth, false);
         
-        @for (int i = 0; i < StatischeKlasse.N; StatischeKlasse.i = i++)
+        foreach (var proficiencyDTO in proficienciesDTO)
         {
-            if (i == 0)
-            {
-                Console.WriteLine("SaveEmployee StatischeKlasse.N: " + StatischeKlasse.N);
-                Console.WriteLine("SaveEmployee StatischeKlasse.skillLevelInputList.Item1.Count: " + StatischeKlasse.skillLevelInputList.Item1.Count);
-                Console.WriteLine("SaveEmployee StatischeKlasse.skillLevelInputList.Item2.Count: " + StatischeKlasse.skillLevelInputList.Item2.Count);
-            }
-            SkillsDatabase.Program.CreateProficiency(StatischeKlasse.skillLevelInputList.Item1[i], StatischeKlasse.skillLevelInputList.Item2[i], StatischeKlasse.context.VisibleEmployees.Single(e => e.FirstName == FirstName && e.LastName == LastName && e.Birthday == DateOfBirth));
+            context.CreateProficiency(proficiencyDTO.SkillName, proficiencyDTO.SkillLevel, employee, false);
         }
 
-
-
-        nav.NavigateTo("");
-
+        await context.SaveChangesAsync();
     }
 
 }

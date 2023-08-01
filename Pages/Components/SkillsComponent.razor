@@ -8,23 +8,19 @@
         </tr>
     </thead>
     <tbody>
-        @{
-            sli = StatischeKlasse.skillLevelInputList;
-        }
-        @for (int i = 0; i < NumberOfSkills; i++)
+        @foreach (var proficiencyDTO in proficienciesDTO)
         {
-            StatischeKlasse.i = i;
             <tr>
                 <td>
                     
                     <br/>
 
 
-                    <input type="text" @bind-value="SkillName" />
+                    <input type="text" @bind-value="proficiencyDTO.SkillName" />
                      
                 </td>
                 <td>
-                    <InputSelect @bind-Value="SkillLevel">
+                    <InputSelect @bind-Value="proficiencyDTO.SkillLevel">
                         @foreach (var l in Enum.GetValues<ProficiencyLevel>())
                         {
                             <option value="@l">@l</option>
@@ -37,11 +33,8 @@
 </table>
 
 @code {
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor.
     [Parameter]
-    public int NumberOfSkills { get; set; }
-
-    private Tuple<List<string>, List<ProficiencyLevel>> sli = StatischeKlasse.skillLevelInputList;
-
-    private string SkillName { get { return StatischeKlasse.skillLevelInputList.Item1[StatischeKlasse.i]; } set { StatischeKlasse.skillLevelInputList.Item1[StatischeKlasse.i] = value; } }
-    private ProficiencyLevel SkillLevel { get { return StatischeKlasse.skillLevelInputList.Item2[StatischeKlasse.i]; } set { StatischeKlasse.skillLevelInputList.Item2[StatischeKlasse.i] = value; } }
+    public List<ProficiencyBaseDTO> proficienciesDTO { get; init; }
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor.
 }
