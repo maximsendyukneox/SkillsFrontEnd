@@ -1,0 +1,85 @@
+﻿@page "/create-employee"
+@using SkillsDatabase
+@using System
+@inject NavigationManager nav
+
+<h3>Mitarbeiter erfassen</h3>
+
+<div>
+    <table>
+        <tr>
+            <td>Vorname:</td>
+            <td>
+                <input type="text"  name="fname" @bind-value="FirstName" @bind-value:event="oninput"/>
+            </td>
+        </tr>
+        <tr>
+            <td>Nachname:</td>
+            <td>
+                <input type="text" name="lname" @bind-value="LastName" @bind-value:event="oninput" />
+            </td>
+        </tr>
+        <tr>
+            <td>Geburtsdatum:</td>
+            <td>
+                <input type="date" name="dateofbirth" @bind-value="DateOfBirth" @bind-value:event="oninput" />
+            </td>
+        </tr> 
+    </table>
+</div>
+
+<div>
+    <table>
+        <tr>
+            <td>
+                <SkillsComponent proficienciesDTO=@proficienciesDTO />
+            </td>
+            <td>
+                <table>
+                    <tr>
+                        <td><button name="addskill" @onclick="AddSkill">Neuen Skill hinzufügen</button></td>
+                    </tr>
+                    <tr>
+                        <td><button name="save" @onclick="SaveEmployee">Speichern</button></td>
+                    </tr>
+                    <tr>
+                        <td><button name="abort" @onClick="nav.NavigateTo(String.Empty)">Abbrechen</button></td>
+                    </tr>
+                    
+                </table>
+            </td>
+        </tr>
+    </table>
+</div>
+
+
+@code {
+    List<ProficiencyBaseDTO> proficienciesDTO = new();
+    string FirstName = String.Empty;
+    string LastName = String.Empty;
+    DateTime DateOfBirth = new DateTime(2000, 1, 1);
+
+    private void AddSkill()
+    {
+        Console.WriteLine("AddSkill: " + FirstName + ", " + LastName + ", " + DateOfBirth);
+        proficienciesDTO.Add(new(string.Empty, ProficiencyLevel.Basic));
+    }
+
+    private async Task SaveEmployee()
+    {
+        Console.WriteLine(FirstName + LastName + DateOfBirth);
+
+        SkillsDbContext context = Program.dbContextFactory.newContext();
+
+        var employee = context.CreateEmployee(FirstName, LastName, DateOfBirth, false);
+        
+        foreach (var proficiencyDTO in proficienciesDTO)
+        {
+            context.CreateProficiency(proficiencyDTO.SkillName, proficiencyDTO.SkillLevel, employee, false);
+        }
+
+        await context.SaveChangesAsync();
+    }
+
+}
+ 

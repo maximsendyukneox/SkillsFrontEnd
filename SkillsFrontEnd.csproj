@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+	<RazorLanguageVersion>7</RazorLanguageVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Syncfusion.Blazor" Version="22.1.39" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\skillsdotnet7\SkillsBackend.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Images\Icons\" />
+  </ItemGroup>
+
+</Project>
