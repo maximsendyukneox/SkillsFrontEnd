@@ -49,7 +49,7 @@
 
 @code {
     List<Employee> SearchResult = new List<Employee>();
-    SkillsDbContext context = new SkillsDbContextFactory().newContext();
+    SkillsDbContext context = new SkillsDbContextFactory().CreateDbContext();
 
     string searchQuery;
 
