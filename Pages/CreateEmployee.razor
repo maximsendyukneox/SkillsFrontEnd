@@ -69,7 +69,7 @@
     {
         Console.WriteLine(FirstName + LastName + DateOfBirth);
 
-        SkillsDbContext context = Program.dbContextFactory.newContext();
+        SkillsDbContext context = Program.dbContextFactory.CreateDbContext();
 
         var employee = context.CreateEmployee(FirstName, LastName, DateOfBirth, false);
         

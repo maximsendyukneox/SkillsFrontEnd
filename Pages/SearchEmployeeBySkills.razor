@@ -75,7 +75,7 @@
 </table>
 
 @code {
-    SkillsDbContext context = Program.dbContextFactory.newContext();
+    SkillsDbContext context = Program.dbContextFactory.CreateDbContext();
     List<Skill> requiredSkills = new List<Skill>();
     List<ProficiencyLevel> requiredLevels = new List<ProficiencyLevel>();
 
