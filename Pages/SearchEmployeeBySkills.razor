@@ -5,80 +5,56 @@
 <table>
     <tr>
         <td>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Kenntnis</th>
-                        <th>Stufe</th>
-                        <th/>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var skill in requiredSkills)
-                    {
-                        <tr>
-                            <td><input type="text" autocomplete="on" name="skillname" @bind-value=skill.Name /></td>
-                            <td>
-                                <InputSelect @bind-Value="requiredLevels[requiredSkills.IndexOf(skill)]">
-                                    @foreach (var l in Enum.GetValues(typeof(ProficiencyLevel)))
-                                    {
-                                        <option value="@l">@l</option>
-                                    }
-                                </InputSelect>
-                            </td>
-                            <td><img src="~\Images\Icons\delete.png"> @*<a target="_blank" href="https://icons8.com/icon/102550/remove">Delete</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a>*@</td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </td>
-        <td>
-            <table>
-                <tr>
-                    <td><button name="addskill">Hinzufügen</button></td>
-                </tr>
-                
-            </table>
-        </td>
-        <td>
-            <table>
-                @foreach(var emp in searchResult)
-                {
-                    <tr>
-                        <td>
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>@emp.FirstName @emp.LastName</th>
-                                    </tr>
-                                    <tr>
-                                        <th>Kenntnis</th>
-                                        <th>Stufe</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach (var prof in context.GetProficiencies(emp))
-                                    {
-                                        <tr>
-                                            <td>@prof.Skill.Name</td>
-                                            <td>@prof.Level</td>
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
-                        </td>
-                    </tr>
-                }
-            </table>
+
+            <SkillsComponent proficienciesDTO=@proficienciesDTO />
         </td>
     </tr>
+    <tr>
+        <td><button name="addskill" @onclick="AddSkill">Hinzufügen</button></td>
+        <td><button name="searchEmployees" @onclick="SearchEmployees">Suchen</button></td>
+    </tr>
+</table>
+<table>
+    <thead>
+        <tr>
+            <th>Kenntnis</th>
+            <th>Stufe</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var p in searchResult)
+        {
+            <tr>
+                <td>
+                    @p.Owner.FirstName
+                </td>
+                @p.Owner.LastName
+                <td>
+                    @p.Skill.Name
+                </td>
+                <td>
+                    @p.Level
+                </td>
+            </tr>
+        }
+    </tbody>
 </table>
 
 @code {
     SkillsDbContext context = Program.dbContextFactory.CreateDbContext();
-    List<Skill> requiredSkills = new List<Skill>();
-    List<ProficiencyLevel> requiredLevels = new List<ProficiencyLevel>();
+    List<ProficiencyBaseDTO> proficienciesDTO = new();
+    List<Proficiency> searchResult = new List<Proficiency>();
 
-    List<Employee> searchResult = new List<Employee>();
+    private void AddSkill()
+    {
+        Console.WriteLine("AddSkill: ");
+        proficienciesDTO.Add(new(string.Empty, ProficiencyLevel.Basic));
+    }
 
+    private void SearchEmployees()
+    {
+        Console.WriteLine("SearchEmployees: ");
+
+        searchResult = context.GetProficiencies(proficienciesDTO);
+    }
 }
