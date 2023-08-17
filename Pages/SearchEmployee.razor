@@ -48,10 +48,9 @@
 
 
 @code {
+    string searchQuery = string.Empty;
     List<Employee> SearchResult = new List<Employee>();
     SkillsDbContext context = new SkillsDbContextFactory().CreateDbContext();
-
-    string searchQuery;
 
     protected override void OnInitialized()
     {

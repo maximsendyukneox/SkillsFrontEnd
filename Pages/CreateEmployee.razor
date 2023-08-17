@@ -43,7 +43,7 @@
                         <td><button name="save" @onclick="SaveEmployee">Speichern</button></td>
                     </tr>
                     <tr>
-                        <td><button name="abort" @onClick="nav.NavigateTo(String.Empty)">Abbrechen</button></td>
+                        <td><button name="abort" @onClick="nav.NavigateTo(string.Empty)">Abbrechen</button></td>
                     </tr>
                     
                 </table>
@@ -55,8 +55,8 @@
 
 @code {
     List<ProficiencyBaseDTO> proficienciesDTO = new();
-    string FirstName = String.Empty;
-    string LastName = String.Empty;
+    string FirstName = string.Empty;
+    string LastName = string.Empty;
     DateTime DateOfBirth = new DateTime(2000, 1, 1);
 
     private void AddSkill()
