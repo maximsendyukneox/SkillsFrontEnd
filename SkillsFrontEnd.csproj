@@ -15,6 +15,10 @@
     <ProjectReference Include="..\skillsdotnet7\SkillsBackend.csproj" />
   </ItemGroup>
 
+    <ItemGroup>
+    <ProjectReference Include="..\skillsdotnet7\skillsdotnet7.client\SkillsBackend.client.csproj" />
+  </ItemGroup>
+
   <ItemGroup>
     <Folder Include="Images\Icons\" />
   </ItemGroup>
