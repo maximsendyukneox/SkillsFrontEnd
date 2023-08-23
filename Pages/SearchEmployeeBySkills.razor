@@ -25,18 +25,18 @@
     </thead>
     <tbody>
         @{
-            var owner = (Employee)null;
+            Employee? owner = null;
             foreach (var p in searchResult)
             {
                 <tr>
                     <td>
-                        @if (p.Owner != owner || searchResult.IndexOf(p) == 0)
+                        @if (owner != p.Owner || searchResult.IndexOf(p) == 0)
                         {
                             @p.Owner.FirstName
                         }
                     </td>
                     <td>
-                        @if (p.Owner != owner || searchResult.IndexOf(p) == 0)
+                        @if (owner != p.Owner || searchResult.IndexOf(p) == 0)
                         {
                             @p.Owner.LastName
                         }
