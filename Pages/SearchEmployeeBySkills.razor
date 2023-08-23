@@ -24,20 +24,32 @@
         </tr>
     </thead>
     <tbody>
-        @foreach (var p in searchResult)
-        {
-            <tr>
-                <td>
-                    @p.Owner.FirstName
-                </td>
-                @p.Owner.LastName
-                <td>
-                    @p.Skill.Name
-                </td>
-                <td>
-                    @p.Level
-                </td>
-            </tr>
+        @{
+            var owner = (Employee)null;
+            foreach (var p in searchResult)
+            {
+                <tr>
+                    <td>
+                        @if (p.Owner != owner || searchResult.IndexOf(p) == 0)
+                        {
+                            @p.Owner.FirstName
+                        }
+                    </td>
+                    <td>
+                        @if (p.Owner != owner || searchResult.IndexOf(p) == 0)
+                        {
+                            @p.Owner.LastName
+                        }
+                    </td>
+                    <td>
+                        @p.Skill.Name
+                    </td>
+                    <td>
+                        @p.Level
+                    </td>
+                </tr>
+                owner = p.Owner;
+            }
         }
     </tbody>
 </table>

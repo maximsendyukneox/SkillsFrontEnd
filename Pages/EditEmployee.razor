@@ -1,4 +1,5 @@
-﻿@page "/edit-employee"
+﻿@page "/edit-employee/{Id}"
+@implements IDisposable
 @using SkillsDatabase
 <h3>Mitarbeiterdaten ändern</h3>
 
@@ -7,19 +8,19 @@
         <tr>
             <td>Vorname:</td>
             <td>
-                <input type="text" name="fname" />
+                <input type="text" name="fname" @bind-value="fname" @oninput="UpdateCredentials"/>
             </td>
         </tr>
         <tr>
             <td>Nachname:</td>
             <td>
-                <input type="text" name="lname" />
+                <input type="text" name="lname" @bind-value="lname" @oninput="UpdateCredentials" />
             </td>
         </tr>
         <tr>
             <td>Geburtsdatum:</td>
             <td>
-                <input type="date" name="dateofbirth" />
+                <input type="date" name="dateofbirth" @bind-value="dateOfBirth" @oninput="UpdateCredentials" />
             </td>
         </tr>
     </table>
@@ -28,7 +29,7 @@
 <div>
     <table>
         <tr>
-            <td><button name="deleteemployee">Mitarbeiter löschen</button></td>
+            <td><button name="deleteemployee" @onclick="DeleteEmployee_Click">Mitarbeiter löschen</button></td>
         </tr>
     </table>
 </div>
@@ -40,7 +41,7 @@
 
                 <table>
                     <thead>
-                        <tr>
+                    <tr>
                             <th>Kenntnis</th>
                             <th>Stufe</th>
                             <th/>
@@ -52,23 +53,25 @@
                         {
                             
                             <tr>
+                        <td>
+                            <SkillsComponent proficienciesDTO="proficiencyDTOs"/>
+                        </td>
+                        <td>
+                            <table>
+                                @foreach(var pDTO in proficiencyDTOs)
+                                {
+                                    <tr><td>
+                                        <button name="delete" @onclick="() => DeleteProficiency(pDTO)">Löschen</button>
+                                    </td></tr>
+                                }
+                            </table>
+                        </td>
+                        
                                 <td>
-                                    <input type="text" autocomplete="on" name="skillname" @bind-value="proficiency.Skill.Name" />
+                                    <img src="../Images/Icons/delete.png"> @*<a target="_blank" href="https://icons8.com/icon/102550/remove">Delete</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a>*@
                                 </td>
-                                <td>
-                                    <InputSelect @bind-Value="proficiency.Level">
-                                            @foreach (var l in Enum.GetValues<ProficiencyLevel>())
-                                            {
-                                            <option value="@l">@l</option>
-                                            }
-                                    </InputSelect>
-                                </td>
-                                
-                                <td>
-                                    <img src="~\Images\Icons\delete.png"> @*<a target="_blank" href="https://icons8.com/icon/102550/remove">Delete</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a>*@
-                                </td>
-                            </tr>
-                             
+                    </tr>
+                    
                         }
                     </tbody>
                 </table>
@@ -85,7 +88,52 @@
 </div>
 
 @code {
+    [Parameter]
+    public string Id { get; set; }
 
-    List<Proficiency> proficiencies = new List<Proficiency>();
+    SkillsDbContext context = Program.dbContextFactory.CreateDbContext();
+    Employee employee;
+    List<Proficiency> proficiencies;
 
+    List<ProficiencyBaseDTO> proficiencyDTOs;
+
+    string fname, lname;
+
+    DateTime dateOfBirth;
+
+
+    protected override Task OnInitializedAsync()
+    {
+        employee = context.VisibleEmployees.Single(emp => emp.Id == Convert.ToInt32(Id));
+        proficiencies = context.GetProficiencies(employee);
+
+        proficiencyDTOs = new();
+
+        foreach(var p in proficiencies)
+        {
+            proficiencyDTOs.Add(new ProficiencyBaseDTO(p.Skill.Name, p.Level));
+        }
+
+        return base.OnInitializedAsync();
+    }
+
+    private void UpdateCredentials()
+    {
+        context.ModifyEmployee(employee, fname, lname);
+    }
+
+    private void DeleteProficiency(ProficiencyBaseDTO pDTO)
+    {
+        context.VisibleProficiencies.Remove(context.VisibleProficiencies.Single(p => p.Skill.Name == pDTO.SkillName && p.Owner == employee));
+    }
+
+    private void DeleteEmployee_Click()
+    {
+        context.DeleteEmployee(employee);
+    }
+
+    public void Dispose()
+    {
+        context.SaveChanges();
+    }
 }

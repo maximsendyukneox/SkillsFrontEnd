@@ -35,8 +35,8 @@
                     @e.Birthday
                 </td>
                 <td>
-                    <button type="button" >
-                            <img src="~\Images\Icons\edit.png"> @*<a target="_blank" href="https://icons8.com/icon/102550/edit">Edit</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a>*@
+                    <button type="button" @onclick="() => EditClick(e)">
+                            <img src="../Images/Icons/edit.png"> @*<a target="_blank" href="https://icons8.com/icon/102550/edit">Edit</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a>*@
                     </button> 
                 </td>
             </tr>
@@ -50,13 +50,11 @@
 @code {
     string searchQuery = string.Empty;
     List<Employee> SearchResult = new List<Employee>();
-    SkillsDbContext context = new SkillsDbContextFactory().CreateDbContext();
+    SkillsDbContext context = Program.dbContextFactory.CreateDbContext();
 
     protected override void OnInitialized()
     {
         base.OnInitialized();
-
-
 
         SearchResult = context.VisibleEmployees.ToList();
 
@@ -67,9 +65,12 @@
         SearchResult = context.VisibleEmployees.Where(emp => emp.FirstName.StartsWith(searchQuery) || emp.LastName.StartsWith(searchQuery)).ToList();
     }
 
-    private void EditClick()
+    private int id;
+
+    private void EditClick(Employee emp)
     {
-        nav.NavigateTo("/edit-employee");
+        id = emp.Id;
+        nav.NavigateTo("/edit-employee/"+id);
     }
 
 }
