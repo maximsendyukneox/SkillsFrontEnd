@@ -1,4 +1,5 @@
 ﻿@page "/search-employee"
+@implements IDisposable
 @using SkillsDatabase
 @using Microsoft.EntityFrameworkCore
 @inject NavigationManager nav
@@ -36,7 +37,7 @@
                 </td>
                 <td>
                     <button type="button" @onclick="() => EditClick(e)">
-                            <img src="../Images/Icons/edit.png"> @*<a target="_blank" href="https://icons8.com/icon/102550/edit">Edit</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a>*@
+                            <img src="./Images/Icons/edit.png"> @*<a target="_blank" href="https://icons8.com/icon/102550/edit">Edit</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a>*@
                     </button> 
                 </td>
             </tr>
@@ -73,4 +74,8 @@
         nav.NavigateTo("/edit-employee/"+id);
     }
 
+    public void Dispose()
+    {
+        context.Dispose();
+    }
 }

@@ -1,6 +1,7 @@
 ﻿@page "/edit-employee/{Id}"
 @implements IDisposable
 @using SkillsDatabase
+@using Microsoft.Data.SqlClient
 <h3>Mitarbeiterdaten ändern</h3>
 
 <div>
@@ -41,38 +42,34 @@
 
                 <table>
                     <thead>
-                    <tr>
+                        <tr>
                             <th>Kenntnis</th>
                             <th>Stufe</th>
-                            <th/>
-                            <th/>
+                            <th />
+                            <th />
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach(var proficiency in proficiencies)
-                        {
-                            
-                            <tr>
-                        <td>
-                            <SkillsComponent proficienciesDTO="proficiencyDTOs"/>
-                        </td>
-                        <td>
-                            <table>
-                                @foreach(var pDTO in proficiencyDTOs)
-                                {
-                                    <tr><td>
-                                        <button name="delete" @onclick="() => DeleteProficiency(pDTO)">Löschen</button>
-                                    </td></tr>
-                                }
-                            </table>
-                        </td>
-                        
-                                <td>
-                                    <img src="../Images/Icons/delete.png"> @*<a target="_blank" href="https://icons8.com/icon/102550/remove">Delete</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a>*@
-                                </td>
-                    </tr>
-                    
-                        }
+                        <tr>
+                            <td>
+                                <SkillsComponent proficienciesDTO="proficiencyDTOs" />
+                            </td>
+                            <td>
+                                <table>
+                                    @foreach (var pDTO in proficiencyDTOs)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <button name="delete" @onclick="() => DeleteProficiency(pDTO)">Löschen</button>
+                                            </td>
+                                        </tr>
+                                    }
+                                </table>
+                            </td>
+                            <td>
+                                <img src="./Images/Icons/delete.png"> @*<a target="_blank" href="https://icons8.com/icon/102550/remove">Delete</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a>*@
+                            </td>
+                        </tr>
                     </tbody>
                 </table>
             </td>
@@ -91,22 +88,26 @@
     [Parameter]
     public string Id { get; set; }
 
-    SkillsDbContext context = Program.dbContextFactory.CreateDbContext();
+    SkillsDbContext context;
     Employee employee;
-    List<Proficiency> proficiencies;
 
     List<ProficiencyBaseDTO> proficiencyDTOs;
 
-    string fname, lname;
+    string fname { get; set; }
+    string lname { get; set; }
 
-    DateTime dateOfBirth;
+    DateTime dateOfBirth { get; set; }
 
 
     protected override Task OnInitializedAsync()
     {
+        context = Program.dbContextFactory.CreateDbContext();
         employee = context.VisibleEmployees.Single(emp => emp.Id == Convert.ToInt32(Id));
-        proficiencies = context.GetProficiencies(employee);
 
+        fname = employee.FirstName;
+        lname = employee.LastName;
+        dateOfBirth = employee.Birthday;
+        List<Proficiency> proficiencies = context.GetProficiencies(employee);
         proficiencyDTOs = new();
 
         foreach(var p in proficiencies)
