@@ -12,11 +12,26 @@ public class Program
     public static SkillsDbContextFactory dbContextFactory { get; private set; } //TODO: Refactor static variable into WebApplication service
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor.
 
+    private static void debug()
+    {
+        var context = dbContextFactory.CreateDbContext();
+        var deleted = context.InvisibleEmployees.Where(e => e.LastName == "Mustermann14").First();
+        if (deleted is not null)
+            context.UnhideEmployee(deleted, true);
+        else
+        {
+            Console.WriteLine("No deleted employee Mustermann14 in database found");
+        }
+        context.Dispose();
+    }
+
     public static void Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
 
         dbContextFactory = new SkillsDbContextFactory();
+
+        debug();
 
         // Add services to the container.
         builder.Services.AddRazorPages();
