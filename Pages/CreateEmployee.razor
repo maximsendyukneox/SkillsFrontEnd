@@ -29,6 +29,10 @@
 </div>
 
 <div>
+    <p style="color:red">@Error</p>
+</div>
+
+<div>
     <table>
         <tr>
             <td>
@@ -43,7 +47,7 @@
                         <td><button name="save" @onclick="SaveEmployee">Speichern</button></td>
                     </tr>
                     <tr>
-                        <td><button name="abort" @onClick="nav.NavigateTo(string.Empty)">Abbrechen</button></td>
+                        <td><button name="abort" @onclick="DiscardChanges">Abbrechen</button></td>
                     </tr>
                     
                 </table>
@@ -59,6 +63,8 @@
     string LastName = string.Empty;
     DateTime DateOfBirth = new DateTime(2000, 1, 1);
 
+    private string Error { get; set; } = String.Empty;
+
     private void AddSkill()
     {
         Console.WriteLine("AddSkill: " + FirstName + ", " + LastName + ", " + DateOfBirth);
@@ -70,16 +76,35 @@
         Console.WriteLine(FirstName + LastName + DateOfBirth);
 
         SkillsDbContext context = Program.dbContextFactory.CreateDbContext();
-
-        var employee = context.CreateEmployee(FirstName, LastName, DateOfBirth, false);
-        
+        Employee employee = null;
+        try
+        {
+            employee = context.CreateEmployee(FirstName, LastName, DateOfBirth, false);
+        }
+        catch(ArgumentException ex)
+        {
+            if (ex.Message == "Special characters are not allowed")
+            {
+                Error = " Sonderzeichen im Namen sind nicht erlaubt!";
+                return;
+            }
+            else if (ex.Message == "The date of birth must not be in the future")
+            {
+                Error = " Das Geburtsdatum muss nicht in der Zukunft liegen!";
+                return;
+            }
+        }
         foreach (var proficiencyDTO in proficienciesDTO)
         {
             context.CreateProficiency(proficiencyDTO.SkillName, proficiencyDTO.SkillLevel, employee, false);
         }
 
         await context.SaveChangesAsync();
+        nav.NavigateTo("edit-employee/" + employee.Id);
     }
-
+    private void DiscardChanges()
+    {
+        nav.NavigateTo("/");
+    }
 }
  

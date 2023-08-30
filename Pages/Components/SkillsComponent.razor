@@ -33,8 +33,10 @@
 </table>
 
 @code {
-#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor.
+    #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor.
     [Parameter]
-    public List<ProficiencyBaseDTO> proficienciesDTO { get; init; }
+    public List<ProficiencyBaseDTO> proficienciesDTO { get; set; }
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor.
+
+    
 }

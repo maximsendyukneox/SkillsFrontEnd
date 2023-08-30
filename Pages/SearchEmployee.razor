@@ -33,7 +33,7 @@
                     @e.LastName
                 </td>
                 <td>
-                    @e.Birthday
+                        @e.Birthday.ToShortDateString()
                 </td>
                 <td>
                     <button type="button" @onclick="() => EditClick(e)">

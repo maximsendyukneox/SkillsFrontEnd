@@ -1,5 +1,6 @@
 ﻿@page "/edit-employee/{Id}"
 @implements IDisposable
+@inject NavigationManager nav
 @using SkillsDatabase
 @using Microsoft.Data.SqlClient
 <h3>Mitarbeiterdaten ändern</h3>
@@ -21,7 +22,7 @@
         <tr>
             <td>Geburtsdatum:</td>
             <td>
-                <input type="date" name="dateofbirth" @bind-value="dateOfBirth" @oninput="UpdateCredentials" />
+                @dateOfBirth.ToShortDateString()
             </td>
         </tr>
     </table>
@@ -41,14 +42,7 @@
             <td>
 
                 <table>
-                    <thead>
-                        <tr>
-                            <th>Kenntnis</th>
-                            <th>Stufe</th>
-                            <th />
-                            <th />
-                        </tr>
-                    </thead>
+                    
                     <tbody>
                         <tr>
                             <td>
@@ -56,18 +50,20 @@
                             </td>
                             <td>
                                 <table>
+                                    <tr/>
                                     @foreach (var pDTO in proficiencyDTOs)
                                     {
                                         <tr>
                                             <td>
-                                                <button name="delete" @onclick="() => DeleteProficiency(pDTO)">Löschen</button>
+                                                <button name="delete" @onclick="() => DeleteProficiency(pDTO)">
+                                                    <img src="./Images/Icons/delete.png" > @*<a target="_blank" href="https://icons8.com/icon/102550/remove">Delete</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a>*@
+                                                </button>
                                             </td>
                                         </tr>
                                     }
                                 </table>
                             </td>
                             <td>
-                                <img src="./Images/Icons/delete.png"> @*<a target="_blank" href="https://icons8.com/icon/102550/remove">Delete</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a>*@
                             </td>
                         </tr>
                     </tbody>
@@ -76,7 +72,7 @@
             <td>
                 <table>
                     <tr>
-                        <td><button name="addskill">Kenntnis hinzufügen</button></td>
+                        <td><button name="addskill" @onclick="AddProficiency">Kenntnis hinzufügen</button></td>
                     </tr>
                 </table>
             </td>
@@ -92,6 +88,7 @@
     Employee employee;
 
     List<ProficiencyBaseDTO> proficiencyDTOs;
+    List<Proficiency> proficiencies;
 
     string fname { get; set; }
     string lname { get; set; }
@@ -107,7 +104,7 @@
         fname = employee.FirstName;
         lname = employee.LastName;
         dateOfBirth = employee.Birthday;
-        List<Proficiency> proficiencies = context.GetProficiencies(employee);
+        proficiencies = context.GetProficiencies(employee);
         proficiencyDTOs = new();
 
         foreach(var p in proficiencies)
@@ -125,16 +122,47 @@
 
     private void DeleteProficiency(ProficiencyBaseDTO pDTO)
     {
-        context.VisibleProficiencies.Remove(context.VisibleProficiencies.Single(p => p.Skill.Name == pDTO.SkillName && p.Owner == employee));
+        context.VisibleProficiencies.Remove(context.VisibleProficiencies.Single(prof => prof.Skill.Name == pDTO.SkillName && prof.Owner == employee));
+        proficiencyDTOs.Remove(proficiencyDTOs.Single(p => p.SkillName == pDTO.SkillName));
     }
 
     private void DeleteEmployee_Click()
     {
         context.DeleteEmployee(employee);
+        nav.NavigateTo("/search-employee");
+    }
+
+    private bool skillAdded = false;
+
+
+
+    private void AddProficiency()
+    {
+        proficiencyDTOs.Add(
+            new ProficiencyBaseDTO(
+                String.Empty,
+                ProficiencyLevel.Basic
+            )
+        );
+
+
+        skillAdded = true;
     }
 
     public void Dispose()
     {
+        if (skillAdded)
+        {
+            context.CreateProficiency(proficiencyDTOs.Last().SkillName, proficiencyDTOs.Last().SkillLevel, employee, true);
+            proficiencies.Add(context.VisibleProficiencies.Single(p => p.Owner == employee && p.Skill.Name == proficiencyDTOs.Last().SkillName));
+            
+        }
+        foreach(var pDTO in proficiencyDTOs)
+        {
+            Proficiency proficiency = proficiencies[proficiencyDTOs.IndexOf(pDTO)];
+            //context.RenameSkill(context.Skills.Single(s => s == proficiency.Skill),pDTO.SkillName);
+            context.ModifyProficiency(context.VisibleProficiencies.Single(p => p == proficiency), pDTO.SkillLevel);
+        }
         context.SaveChanges();
     }
 }
