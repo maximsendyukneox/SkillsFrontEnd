@@ -84,10 +84,10 @@
     [Parameter]
     public string Id { get; set; }
 
-    SkillsDbContext context;
+    //SkillsDbContext context;
     Employee employee;
 
-    List<ProficiencyBaseDTO> proficiencyDTOs;
+    List<ProficiencyBaseDTO> proficiencyDTOs = new();
     List<Proficiency> proficiencies;
 
     string fname { get; set; }
@@ -95,29 +95,32 @@
 
     DateTime dateOfBirth { get; set; }
 
+    SkillsDbContext context;
 
-    protected override Task OnInitializedAsync()
+
+    protected async override Task OnInitializedAsync()
     {
         context = Program.dbContextFactory.CreateDbContext();
-        employee = context.VisibleEmployees.Single(emp => emp.Id == Convert.ToInt32(Id));
+        employee = await Program.client.GetEmployeeAsync(Convert.ToInt32(Id));
 
         fname = employee.FirstName;
         lname = employee.LastName;
         dateOfBirth = employee.Birthday;
-        proficiencies = context.GetProficiencies(employee);
-        proficiencyDTOs = new();
+        proficiencies = await Program.client.GetProficiencyAsync(employee.Id);
+        
 
         foreach(var p in proficiencies)
         {
             proficiencyDTOs.Add(new ProficiencyBaseDTO(p.Skill.Name, p.Level));
         }
 
-        return base.OnInitializedAsync();
+        await base.OnInitializedAsync();
     }
 
-    private void UpdateCredentials()
+    private async Task UpdateCredentials()
     {
-        context.ModifyEmployee(employee, fname, lname);
+        await Program.client.UpdateEmployeeAsync(new EmployeeDTO(fname, lname, dateOfBirth.ToShortDateString(), Convert.ToInt32(Id)));
+
     }
 
     private void DeleteProficiency(ProficiencyBaseDTO pDTO)
@@ -126,9 +129,9 @@
         proficiencyDTOs.Remove(proficiencyDTOs.Single(p => p.SkillName == pDTO.SkillName));
     }
 
-    private void DeleteEmployee_Click()
+    private async Task DeleteEmployee_Click()
     {
-        context.DeleteEmployee(employee);
+        await Program.client.DeleteEmployeeAsync(employee.Id);
         nav.NavigateTo("/search-employee");
     }
 
@@ -163,6 +166,6 @@
             //context.RenameSkill(context.Skills.Single(s => s == proficiency.Skill),pDTO.SkillName);
             context.ModifyProficiency(context.VisibleProficiencies.Single(p => p == proficiency), pDTO.SkillLevel);
         }
-        context.SaveChanges();
+        
     }
 }
