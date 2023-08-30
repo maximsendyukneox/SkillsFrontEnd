@@ -1,6 +1,7 @@
 ﻿@page "/search-employee"
 @implements IDisposable
 @using SkillsDatabase
+@using SkillsBackend.Client
 @using Microsoft.EntityFrameworkCore
 @inject NavigationManager nav
 <h3>Mitarbeiter suchen</h3>
@@ -23,7 +24,7 @@
             </tr>
         </thead>
         <tbody>
-        @foreach(var e in SearchResult)
+        @foreach(var e in searchResult)
         {
             <tr>
                 <td>
@@ -50,20 +51,23 @@
 
 @code {
     string searchQuery = string.Empty;
-    List<Employee> SearchResult = new List<Employee>();
+    List<Employee> searchResult = new List<Employee>();
     SkillsDbContext context = Program.dbContextFactory.CreateDbContext();
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        base.OnInitialized();
+        await base.OnInitializedAsync();
 
-        SearchResult = context.VisibleEmployees.ToList();
+        //searchResult = context.VisibleEmployees.ToList();
+        searchResult = await Program.client.GetEmployeesAsync();
 
     }
 
-    private void InputChanged()
+    private async Task InputChanged()
     {
-        SearchResult = context.VisibleEmployees.Where(emp => emp.FirstName.StartsWith(searchQuery) || emp.LastName.StartsWith(searchQuery)).ToList();
+        if (searchQuery is null || String.Empty == searchQuery) return;
+        //searchResult = context.VisibleEmployees.Where(emp => emp.FirstName.StartsWith(searchQuery) || emp.LastName.StartsWith(searchQuery)).ToList();
+        searchResult = await Program.client.GetEmployeeAsync(searchQuery);
     }
 
     private int id;

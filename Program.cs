@@ -14,6 +14,7 @@ public class Program
 {
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor.
     public static SkillsDbContextFactory dbContextFactory { get; private set; } //TODO: Refactor static variable into WebApplication service
+    public static SkillsClient client { get; private set; }
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor.
 
     private static void debug()
@@ -31,14 +32,15 @@ public class Program
 
     public static void Main(string[] args)
     {
-        var client = new ClientTest();
-        client.GetEmployeesAsync();
+        client = new SkillsClient(Constants.API_BASE_URI, "Integration_Test");
+        //var client = new ClientTest();
+        //client.GetEmployeesAsync();
         
         var builder = WebApplication.CreateBuilder(args);
 
         dbContextFactory = new SkillsDbContextFactory();
 
-        debug();
+        //debug();
 
         // Add services to the container.
         builder.Services.AddRazorPages();
@@ -76,13 +78,11 @@ internal class ClientTest
 {
     private SkillsClient CreateClient()
     {
-        
         var client = new SkillsClient(Constants.API_BASE_URI, "Integration_Test");
         return client;
     }
     public async void GetEmployeesAsync()
     {
-
         Console.WriteLine("Begin of Client Integration Test");
         var client = CreateClient();
         // await client.Employees.PostAsync(new EmployeeDTin("August", "Test2500", "25.08.2023"));
