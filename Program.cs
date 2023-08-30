@@ -77,28 +77,13 @@ internal class ClientTest
     private SkillsClient CreateClient()
     {
         
-        var client = new SkillsClient("http://localhost:63357/", "Integration_Test");
-        //var client = new SkillsClient("https://localhost:63356/", "Integrat");
+        var client = new SkillsClient(Constants.API_BASE_URI, "Integration_Test");
         return client;
     }
     public async void GetEmployeesAsync()
     {
 
         Console.WriteLine("Begin of Client Integration Test");
-        var _httpClient = new HttpClient() { BaseAddress = new Uri("https://localhost:63356/") };
-        try
-        {
-            using var res = await _httpClient.GetAsync(_httpClient.BaseAddress.AppendPathSegment("Employees/1"));
-            // The following line will throw HttpRequestException with StatusCode set if it wasn't 2xx.
-            Console.WriteLine(res == null);
-            res.EnsureSuccessStatusCode();
-            Console.Write(res?.Content.ToString());
-        }
-        catch (Exception ex)
-        {
-            // Handle 404
-            Console.WriteLine("Not found: " + ex.Message);
-        }
         var client = CreateClient();
         // await client.Employees.PostAsync(new EmployeeDTin("August", "Test2500", "25.08.2023"));
         Console.WriteLine("CreateClient.GetEmployeesAsync Test");
