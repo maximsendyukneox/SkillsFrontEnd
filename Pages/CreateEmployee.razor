@@ -93,6 +93,12 @@
                 Error = " Das Geburtsdatum muss nicht in der Zukunft liegen!";
                 return;
             }
+            else if (ex.Message == "The name must not be empty")
+            {
+                Error = " Weder Vorname noch Nachname muss leer sein!";
+                return;
+            }
+            else throw;
         }
         foreach (var proficiencyDTO in proficienciesDTO)
         {

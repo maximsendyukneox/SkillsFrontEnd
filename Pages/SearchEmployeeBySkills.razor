@@ -68,7 +68,7 @@
     private void SearchEmployees()
     {
         Console.WriteLine("SearchEmployees: ");
-
+        proficienciesDTO = proficienciesDTO.FindAll(p => p.SkillName != String.Empty);
         searchResult = context.GetProficiencies(proficienciesDTO);
     }
 }

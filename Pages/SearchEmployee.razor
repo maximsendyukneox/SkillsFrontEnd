@@ -10,7 +10,7 @@
     Name:
 </p>
 
-<input type="text" name="searchbyname" @bind-value="searchQuery" @oninput="InputChanged"/>
+<input type="text" name="searchbyname" @bind="SearchQuery" @bind:event="oninput" @onkeyup="InputChanged"/>
 
 <div>
     <table>
@@ -50,7 +50,19 @@
 
 
 @code {
-    string searchQuery = string.Empty;
+    string searchQuery = String.Empty;
+
+    string SearchQuery 
+    {
+        get => searchQuery;
+        set
+        {
+            searchQuery = value;
+            Task.Run(InputChanged);
+            StateHasChanged();
+
+        } 
+    }
     List<Employee> searchResult = new List<Employee>();
     SkillsDbContext context = Program.dbContextFactory.CreateDbContext();
 
@@ -60,14 +72,20 @@
 
         //searchResult = context.VisibleEmployees.ToList();
         searchResult = await Program.client.GetEmployeesAsync();
-
+        searchResult.Sort((emp1, emp2) => String.Compare(emp1.FirstName, emp2.FirstName));
     }
 
     private async Task InputChanged()
     {
-        if (searchQuery is null || String.Empty == searchQuery) return;
+        if (SearchQuery is null || String.Empty == SearchQuery)
+        {
+            searchResult = await Program.client.GetEmployeesAsync();
+            searchResult.Sort((emp1, emp2) => String.Compare(emp1.FirstName, emp2.FirstName));
+            return;
+        }
         //searchResult = context.VisibleEmployees.Where(emp => emp.FirstName.StartsWith(searchQuery) || emp.LastName.StartsWith(searchQuery)).ToList();
-        searchResult = await Program.client.GetEmployeeAsync(searchQuery);
+        searchResult = await Program.client.GetEmployeeAsync(SearchQuery);
+        searchResult.Sort((emp1, emp2) => String.Compare(emp1.FirstName, emp2.FirstName));
     }
 
     private int id;

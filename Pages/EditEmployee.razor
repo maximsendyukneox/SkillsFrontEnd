@@ -10,13 +10,13 @@
         <tr>
             <td>Vorname:</td>
             <td>
-                <input type="text" name="fname" @bind-value="fname" @oninput="UpdateCredentials"/>
+                <input type="text" name="fname" @bind-value="fname" @bind-value:event="oninput" />
             </td>
         </tr>
         <tr>
             <td>Nachname:</td>
             <td>
-                <input type="text" name="lname" @bind-value="lname" @oninput="UpdateCredentials" />
+                <input type="text" name="lname" @bind-value="lname" @bind-value:event="oninput" />
             </td>
         </tr>
         <tr>
@@ -80,6 +80,14 @@
     </table>
 </div>
 
+<div>
+    <p style="color:red">@Error</p>
+</div>
+
+<div>
+    <button name="savechanges" @onclick="SaveChanges">Speichern</button>
+</div>
+
 @code {
     [Parameter]
     public string Id { get; set; }
@@ -97,6 +105,8 @@
 
     SkillsDbContext context;
 
+    private string Error { get; set; } = String.Empty;
+
 
     protected async override Task OnInitializedAsync()
     {
@@ -107,7 +117,7 @@
         lname = employee.LastName;
         dateOfBirth = employee.Birthday;
         proficiencies = await Program.client.GetProficiencyAsync(employee.Id);
-        
+
 
         foreach(var p in proficiencies)
         {
@@ -150,6 +160,51 @@
 
 
         skillAdded = true;
+    }
+
+    private async Task SaveChanges()
+    {
+        try
+        {
+            InputChecker.ValidateName(fname);
+            InputChecker.ValidateName(lname);
+        }
+        catch(ArgumentException ex)
+        {
+            if (ex.Message == "Special characters are not allowed")
+            {
+                Error = " Sonderzeichen im Namen sind nicht erlaubt!";
+                return;
+            }
+            else if (ex.Message == "The name must not be empty")
+            {
+                Error = " Weder Vorname noch Nachname darf leer sein!";
+                return;
+            }
+            else throw;
+        }
+
+        await UpdateCredentials();
+
+        try
+        {
+            foreach(var prof in proficiencyDTOs)
+            {
+                InputChecker.ValidateSkill(prof.SkillName);
+            }
+        }
+        catch(ArgumentException ex)
+        {
+        if (ex.Message == "The name must not be empty")
+            {
+                Error = " Kenntnisnamen dürfen nicht leer sein";
+                return;
+            }
+            else throw;
+        }
+        //TODO: insert Proficienty-Update-Methods calls here 
+
+        nav.NavigateTo("edit-employee/" + Id);
     }
 
     public void Dispose()
