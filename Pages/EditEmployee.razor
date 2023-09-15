@@ -88,6 +88,10 @@
     <button name="savechanges" @onclick="SaveChanges">Speichern</button>
 </div>
 
+<div>
+    <p style="color:green">@Message</p>
+</div>
+
 @code {
     [Parameter]
     public string Id { get; set; }
@@ -106,6 +110,7 @@
     SkillsDbContext context;
 
     private string Error { get; set; } = String.Empty;
+    private string Message { get; set; } = String.Empty;
 
 
     protected async override Task OnInitializedAsync()
@@ -195,7 +200,7 @@
         }
         catch(ArgumentException ex)
         {
-        if (ex.Message == "The name must not be empty")
+            if (ex.Message == "The name must not be empty")
             {
                 Error = " Kenntnisnamen dürfen nicht leer sein";
                 return;
@@ -204,7 +209,7 @@
         }
         //TODO: insert Proficienty-Update-Methods calls here 
 
-        nav.NavigateTo("edit-employee/" + Id);
+        Message = " Änderungen wurden gespeichert!";
     }
 
     public void Dispose()
