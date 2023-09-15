@@ -6,6 +6,7 @@ using SkillsDatabase;
 using SkillsFrontEnd.Data;
 using System.Net;
 using System.Net.Http;
+using MudBlazor.Services;
 
 
 namespace SkillsFrontEnd;
@@ -16,6 +17,7 @@ public class Program
     public static SkillsDbContextFactory dbContextFactory { get; private set; } //TODO: Refactor static variable into WebApplication service
     public static SkillsClient client { get; private set; }
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor.
+   
 
     private static void debug()
     {
@@ -37,6 +39,7 @@ public class Program
         //client.GetEmployeesAsync();
         
         var builder = WebApplication.CreateBuilder(args);
+        builder.Services.AddMudServices();
 
         dbContextFactory = new SkillsDbContextFactory();
 

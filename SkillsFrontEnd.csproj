@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="MudBlazor" Version="6.10.0" />
     <PackageReference Include="Syncfusion.Blazor" Version="22.2.9" />
   </ItemGroup>
 

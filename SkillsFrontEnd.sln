@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SkillsFrontEnd", "SkillsFro
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SkillsBackend", "..\skillsdotnet7\SkillsBackend.csproj", "{25E471FB-BF77-42A5-A5E9-678B6A326C7C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SkillsBackend.client", "..\skillsdotnet7\skillsdotnet7.client\SkillsBackend.client.csproj", "{A4C243DF-B4C3-4C01-AFAF-4975DB6AF68A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SkillsBackend.client", "..\skillsdotnet7\skillsdotnet7.client\SkillsBackend.client.csproj", "{A4C243DF-B4C3-4C01-AFAF-4975DB6AF68A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
