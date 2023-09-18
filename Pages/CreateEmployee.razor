@@ -1,4 +1,4 @@
-﻿@page "/create-employee"
+﻿  @page "/create-employee"
 @using SkillsDatabase
 @using System
 @inject NavigationManager nav
@@ -76,10 +76,12 @@
         Console.WriteLine(FirstName + LastName + DateOfBirth);
 
         SkillsDbContext context = Program.dbContextFactory.CreateDbContext();
-        Employee employee = null;
+
         try
         {
-            employee = context.CreateEmployee(FirstName, LastName, DateOfBirth, false);
+            InputChecker.ValidateName(FirstName);
+            InputChecker.ValidateName(LastName);
+            InputChecker.ValidateDateOfBirth(DateOfBirth);
         }
         catch(ArgumentException ex)
         {
@@ -95,18 +97,65 @@
             }
             else if (ex.Message == "The name must not be empty")
             {
-                Error = " Weder Vorname noch Nachname muss leer sein!";
+                Error = " Weder Vorname noch Nachname darf leer sein!";
+                return;
+            }
+            else throw;
+        }
+
+        EmployeeDTO_keyless employee = new EmployeeDTO_keyless(FirstName, LastName, DateOfBirth.ToShortDateString());
+        Employee? ourEmployee = await Program.client.CreateEmployeeAsync(employee);
+
+
+        var skills = new List<string>();
+        foreach (var proficiencyDTO in proficienciesDTO)
+        {
+            skills.Add(proficiencyDTO.SkillName);
+        }
+        try
+        {
+            InputChecker.FindSkillDuplicates(skills);
+        }
+        catch(ArgumentException ex)
+        {
+            if (ex.Message == "One employee may not have the same skill twice")
+            {
+                Error = " Eine oder mehrere Kenntnisse wurden verdoppelt Eingegeben";
                 return;
             }
             else throw;
         }
         foreach (var proficiencyDTO in proficienciesDTO)
         {
-            context.CreateProficiency(proficiencyDTO.SkillName, proficiencyDTO.SkillLevel, employee, false);
+            try
+            {
+                InputChecker.ValidateSkill(proficiencyDTO.SkillName);
+
+                
+                
+            }
+            catch(ArgumentException ex)
+            {
+                if (ex.Message == "The name must not be empty")
+                {
+                    Error = " Keine Kenntnis darf leer sein!";
+                    return;
+                }
+                else throw;
+            }
+            await Program.client.CreateProficiencyAsync
+            (
+                new SkillsBackend.ProficiencyBaseDTO_withOwner
+                (
+                    proficiencyDTO.SkillName,
+                    proficiencyDTO.SkillLevel,
+                    ourEmployee.Id
+                )
+            );
         }
 
-        await context.SaveChangesAsync();
-        nav.NavigateTo("edit-employee/" + employee.Id);
+        
+        nav.NavigateTo("edit-employee/" + ourEmployee.Id);
     }
     private void DiscardChanges()
     {

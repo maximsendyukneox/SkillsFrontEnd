@@ -140,8 +140,10 @@
 
     private void DeleteProficiency(ProficiencyBaseDTO pDTO)
     {
-        context.VisibleProficiencies.Remove(context.VisibleProficiencies.Single(prof => prof.Skill.Name == pDTO.SkillName && prof.Owner == employee));
-        proficiencyDTOs.Remove(proficiencyDTOs.Single(p => p.SkillName == pDTO.SkillName));
+        // Poka nichego ne rabotayet
+        // context.VisibleProficiencies.Remove(context.VisibleProficiencies.Single(prof => prof.Skill.Name == pDTO.SkillName && prof.Owner == employee));
+        // proficiencyDTOs.Remove(proficiencyDTOs.Single(p => p.SkillName == pDTO.SkillName));
+
     }
 
     private async Task DeleteEmployee_Click()
@@ -150,8 +152,8 @@
         nav.NavigateTo("/search-employee");
     }
 
-    private bool skillAdded = false;
 
+    private int numberOfSkillsAdded = 0;
 
 
     private void AddProficiency()
@@ -163,8 +165,8 @@
             )
         );
 
+        numberOfSkillsAdded++;
 
-        skillAdded = true;
     }
 
     private async Task SaveChanges()
@@ -207,25 +209,58 @@
             }
             else throw;
         }
-        //TODO: insert Proficienty-Update-Methods calls here 
+        var skills = new List<string>();
+        foreach (var proficiencyDTO in proficiencyDTOs)
+        {
+            skills.Add(proficiencyDTO.SkillName);
+        }
+        try
+        {
+            InputChecker.FindSkillDuplicates(skills);
+        }
+        catch (ArgumentException ex)
+        {
+            if (ex.Message == "One employee may not have the same skill twice")
+            {
+                Error = " Eine oder mehrere Kenntnisse wurden verdoppelt Eingegeben";
+                return;
+            }
+            else throw;
+        }
+        for(int i= 0; i < proficiencyDTOs.Count - numberOfSkillsAdded; i++)
+        {
+            int oldProficiencyID = (await Program.client.GetProficiencyAsync(employee.Id)).Single(p => p.Skill.Name == proficiencyDTOs[i].SkillName).Id;
+
+            await Program.client.UpdateProficiencyAsync
+            (
+                new SkillsBackend.ProficiencyBaseDTO_withID
+                (
+                    proficiencyDTOs[i].SkillName,
+                    proficiencyDTOs[i].SkillLevel,
+                    oldProficiencyID
+                )
+            );
+        }
+        for (int i = proficiencyDTOs.Count - numberOfSkillsAdded; i < proficiencyDTOs.Count; i++)
+        {
+            await Program.client.CreateProficiencyAsync
+            (
+                new SkillsBackend.ProficiencyBaseDTO_withOwner
+                (
+                    proficiencyDTOs[i].SkillName,
+                    proficiencyDTOs[i].SkillLevel,
+                    employee.Id
+                )
+            );
+        }
 
         Message = " Änderungen wurden gespeichert!";
     }
 
     public void Dispose()
     {
-        if (skillAdded)
-        {
-            context.CreateProficiency(proficiencyDTOs.Last().SkillName, proficiencyDTOs.Last().SkillLevel, employee, true);
-            proficiencies.Add(context.VisibleProficiencies.Single(p => p.Owner == employee && p.Skill.Name == proficiencyDTOs.Last().SkillName));
-            
-        }
-        foreach(var pDTO in proficiencyDTOs)
-        {
-            Proficiency proficiency = proficiencies[proficiencyDTOs.IndexOf(pDTO)];
-            //context.RenameSkill(context.Skills.Single(s => s == proficiency.Skill),pDTO.SkillName);
-            context.ModifyProficiency(context.VisibleProficiencies.Single(p => p == proficiency), pDTO.SkillLevel);
-        }
+        
+        
         
     }
 }
