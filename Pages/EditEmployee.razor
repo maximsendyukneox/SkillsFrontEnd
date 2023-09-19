@@ -138,12 +138,11 @@
 
     }
 
-    private void DeleteProficiency(ProficiencyBaseDTO pDTO)
+    private async Task DeleteProficiency(ProficiencyBaseDTO pDTO)
     {
-        // Poka nichego ne rabotayet
-        // context.VisibleProficiencies.Remove(context.VisibleProficiencies.Single(prof => prof.Skill.Name == pDTO.SkillName && prof.Owner == employee));
-        // proficiencyDTOs.Remove(proficiencyDTOs.Single(p => p.SkillName == pDTO.SkillName));
-
+        var proficiencyToDelete = (await Program.client.GetProficiencyAsync(employee.Id)).Single(p => p.Skill.Name == pDTO.SkillName);
+        await Program.client.DeleteProficiencyAsync(proficiencyToDelete.Id);
+        proficiencyDTOs.Remove(pDTO);
     }
 
     private async Task DeleteEmployee_Click()
