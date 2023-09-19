@@ -70,6 +70,7 @@
         Console.WriteLine("SearchEmployees: ");
         proficienciesDTO = proficienciesDTO.FindAll(p => p.SkillName != String.Empty);
         var passingEmployees = await Program.client.ProficiencyBasedSearchEngine(proficienciesDTO);
+        searchResult.RemoveAll(p=>true);
         foreach(var employee in passingEmployees)
         {
             searchResult.AddRange(await Program.client.GetProficiencyAsync(employee.Id));
