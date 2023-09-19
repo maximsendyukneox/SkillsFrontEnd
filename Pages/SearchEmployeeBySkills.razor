@@ -65,10 +65,14 @@
         proficienciesDTO.Add(new(string.Empty, ProficiencyLevel.Basic));
     }
 
-    private void SearchEmployees()
+    private async Task SearchEmployees()
     {
         Console.WriteLine("SearchEmployees: ");
         proficienciesDTO = proficienciesDTO.FindAll(p => p.SkillName != String.Empty);
-        searchResult = context.GetProficiencies(proficienciesDTO);
+        var passingEmployees = await Program.client.ProficiencyBasedSearchEngine(proficienciesDTO);
+        foreach(var employee in passingEmployees)
+        {
+            searchResult.AddRange(await Program.client.GetProficiencyAsync(employee.Id));
+        }
     }
 }
