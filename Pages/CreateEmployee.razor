@@ -1,116 +1,112 @@
 ﻿@page "/create-employee"
 @using SkillsDatabase
 @using System
-@inject NavigationManager nav
+@using System.Threading;
+@using System.ComponentModel.DataAnnotations
 
-<h3>Mitarbeiter erfassen</h3>
-
-<div>
-    <table>
-        <tr>
-            <td>Vorname:</td>
-            <td>
-                <input type="text"  name="fname" @bind-value="FirstName" @bind-value:event="oninput"/>
-            </td>
-        </tr>
-        <tr>
-            <td>Nachname:</td>
-            <td>
-                <input type="text" name="lname" @bind-value="LastName" @bind-value:event="oninput" />
-            </td>
-        </tr>
-        <tr>
-            <td>Geburtsdatum:</td>
-            <td>
-                <input type="date" name="dateofbirth" @bind-value="DateOfBirth" @bind-value:event="oninput" />
-            </td>
-        </tr> 
-    </table>
-</div>
-
-<div>
-    <p style="color:red">@Error</p>
-</div>
-
-<div>
-    <table>
-        <tr>
-            <td>
-                <SkillsComponent proficienciesDTO=@proficienciesDTO />
-            </td>
-            <td>
-                <table>
-                    <tr>
-                        <td><button name="addskill" @onclick="AddSkill">Neuen Skill hinzufügen</button></td>
-                    </tr>
-                    <tr>
-                        <td><button name="save" @onclick="SaveEmployee">Speichern</button></td>
-                    </tr>
-                    <tr>
-                        <td><button name="abort" @onclick="DiscardChanges">Abbrechen</button></td>
-                    </tr>
-                    
-                </table>
-            </td>
-        </tr>
-    </table>
-</div>
+<EditForm Model="@model" OnValidSubmit="SaveEmployee">
+    <DataAnnotationsValidator />
+<MudPaper Class="pa-8 ma-2" Elevation="3">
+    <MudText Typo="Typo.h6">Mitarbeiter erfassen</MudText>
+    <MudDivider Style="margin-bottom: 2rem;"/>
+    <MudStack>
+        <MudTextField Style="width:20rem;" OnKeyUp="onInputChanged" @bind-value="model.FirstName" For="@(()=> model.FirstName)" Label="Vorname" Variant="Variant.Outlined"></MudTextField>
+        <MudTextField Style="width:20rem;" OnKeyUp="onInputChanged" @bind-Value="model.LastName" For="@(()=> model.LastName)" Label="Nachname" Variant="Variant.Outlined"></MudTextField>
+        <MudDatePicker Color="Color.Info" PickerOpened="onDatePickerOpened" Style="width:20rem;" ErrorText="Kein valides Datumsformat" Label="Geburtsdatum" @bind-Date="date" MaxDate="DateTime.Now" Variant="Variant.Outlined" Editable="true" />
+        <MudText Style="margin-top: 2rem;" Typo="Typo.h6">Kenntnisse</MudText>
+        @foreach (var proficiency in proficienciesDTO)
+        {
+        <MudList Clickable="false" DisableGutters="true" DisablePadding="true">
+            <MudListItem Text=@proficiency.SkillName />
+            <MudDivider/>        
+        </MudList>   
+        }
+        <MudGrid>
+            <MudItem >
+                <MudTextField Style="width:20rem;" @bind-Value="newProficiency" @onkeyup="AddNewProficiencyOnEnter" TextUpdateSuppression="false" Label="Kenntnis hinzufügen" Variant="Variant.Text"></MudTextField>
+            </MudItem>
+            <MudItem Style="padding:20px 0 0 0;">
+                <MudFab Color="Color.Info" StartIcon="@Icons.Material.Filled.Add" Size="Size.Small" @onclick="AddNewProficiency" />
+            </MudItem>
+        </MudGrid>
+            <MudButton Style="width:8rem; margin-top: 4rem;" ButtonType="ButtonType.Submit" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Save" Color="Color.Info" Size="Size.Medium">Speichern</MudButton>
+            @if (isError)
+            {
+            <MudAlert ShowCloseIcon="true"  Severity="Severity.Error">@ErrorText</MudAlert>
+            }
+            @if (isSuccess)
+            {
+                <MudAlert Style="margin-top: 2rem;"  Severity="Severity.Success">Speichern erfolgreich</MudAlert>
+            }
+    </MudStack>
+</MudPaper>
+</EditForm>
 
 
 @code {
     List<ProficiencyBaseDTO> proficienciesDTO = new();
-    string FirstName = string.Empty;
-    string LastName = string.Empty;
-    DateTime DateOfBirth = new DateTime(2000, 1, 1);
+    private string newProficiency;
+    private List<string> proficiencies = new List<string>();
+    private DateTime? date = DateTime.Today;
+    private bool isError = false;
+    private bool isSuccess = false;
+    private string ErrorText { get; set; } = String.Empty;
+    SaveEmployeeForm model = new SaveEmployeeForm();
 
-    private string Error { get; set; } = String.Empty;
 
-    private void AddSkill()
+    private void AddNewProficiency()
     {
-        Console.WriteLine("AddSkill: " + FirstName + ", " + LastName + ", " + DateOfBirth);
-        proficienciesDTO.Add(new(string.Empty, ProficiencyLevel.Basic));
+        if (!string.IsNullOrWhiteSpace(newProficiency))
+        {   
+            proficienciesDTO.Add(new(newProficiency, ProficiencyLevel.Basic));
+        }
+        newProficiency = string.Empty;
     }
 
-    private async Task SaveEmployee()
+    private void AddNewProficiencyOnEnter(KeyboardEventArgs e)
     {
-        Console.WriteLine(FirstName + LastName + DateOfBirth);
+        if (e.Key == "Enter")
+        {
+            AddNewProficiency();
+        }
+    }
 
-        SkillsDbContext context = Program.dbContextFactory.CreateDbContext();
+    private void onInputChanged(KeyboardEventArgs e)
+    {
+        isSuccess = false;
+    }
+
+    private void onDatePickerOpened()
+    {
+        isSuccess = false;
+    }
+
+
+    private async Task SaveEmployee(EditContext context)
+    {
+        StateHasChanged();
+        SkillsDbContext dbContext = Program.dbContextFactory.CreateDbContext();
         Employee employee = null;
         try
         {
-            employee = context.CreateEmployee(FirstName, LastName, DateOfBirth, false);
+            employee = dbContext.CreateEmployee(model.FirstName, model.LastName, date!.Value, false);
         }
         catch(ArgumentException ex)
         {
-            if (ex.Message == "Special characters are not allowed")
-            {
-                Error = " Sonderzeichen im Namen sind nicht erlaubt!";
-                return;
-            }
-            else if (ex.Message == "The date of birth must not be in the future")
-            {
-                Error = " Das Geburtsdatum muss nicht in der Zukunft liegen!";
-                return;
-            }
-            else if (ex.Message == "The name must not be empty")
-            {
-                Error = " Weder Vorname noch Nachname muss leer sein!";
-                return;
-            }
-            else throw;
+            isError = true;
+            ErrorText = ex.Message;
+            return;
         }
         foreach (var proficiencyDTO in proficienciesDTO)
         {
-            context.CreateProficiency(proficiencyDTO.SkillName, proficiencyDTO.SkillLevel, employee, false);
+            dbContext.CreateProficiency(proficiencyDTO.SkillName, proficiencyDTO.SkillLevel, employee, false);
         }
-
-        await context.SaveChangesAsync();
-        nav.NavigateTo("edit-employee/" + employee.Id);
+        await dbContext.SaveChangesAsync();
+        isSuccess = true;
+        model = new SaveEmployeeForm();
+        date = DateTime.Today;
+        proficienciesDTO.Clear();
     }
-    private void DiscardChanges()
-    {
-        nav.NavigateTo("/");
-    }
+    
 }
  

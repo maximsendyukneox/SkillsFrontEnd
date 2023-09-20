@@ -35,23 +35,15 @@ public class Program
     public static void Main(string[] args)
     {
         client = new SkillsClient(Constants.API_BASE_URI, "Integration_Test");
-        //var client = new ClientTest();
-        //client.GetEmployeesAsync();
-        
         var builder = WebApplication.CreateBuilder(args);
-        builder.Services.AddMudServices();
-
         dbContextFactory = new SkillsDbContextFactory();
 
-        //debug();
-
         // Add services to the container.
+        builder.Services.AddMudServices();
         builder.Services.AddRazorPages();
         builder.Services.AddServerSideBlazor();
-        //builder.Services.AddSingleton<WeatherForecastService>();
-        
-
         var app = builder.Build();
+        
 
         // Configure the HTTP request pipeline.
         if (!app.Environment.IsDevelopment())
@@ -88,14 +80,8 @@ internal class ClientTest
     {
         Console.WriteLine("Begin of Client Integration Test");
         var client = CreateClient();
-        // await client.Employees.PostAsync(new EmployeeDTin("August", "Test2500", "25.08.2023"));
         Console.WriteLine("CreateClient.GetEmployeesAsync Test");
-        //var employees = await client.GetEmployeesAsync();
-        //Console.WriteLine("employees.count = " + employees.Count);
-        //foreach(var employee in employees) { await Console.Out.WriteLineAsync(employee.ToString()); }
-        //var emp = await client.Employees.GetAsync(1);
         var emp = await client.GetEmployeeAsync(1);
-        //Console.WriteLine(employee == null);
         await Console.Out.WriteLineAsync(emp?.ToString());
         var proficiencies = await client.GetProficiencyAsync(1);
         foreach (var prof in proficiencies) { await Console.Out.WriteLineAsync(prof.ToString()); }

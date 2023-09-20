@@ -1,12 +1,8 @@
 ﻿@inherits LayoutComponentBase
 
-    <MudNavMenu>
-        <MudNavLink Href="/" Match="NavLinkMatch.All">Dashboard</MudNavLink>
-        <MudNavLink Href="/servers" Match="NavLinkMatch.Prefix">Servers</MudNavLink>
-        <MudNavGroup Title="Settings" Expanded="true">
-            <MudNavLink Href="/users" Match="NavLinkMatch.Prefix">Users</MudNavLink>
-            <MudNavLink Href="/security" Match="NavLinkMatch.Prefix">Security</MudNavLink>
-        </MudNavGroup>
-        <MudNavLink Href="/about" Match="NavLinkMatch.Prefix">About</MudNavLink>
-    </MudNavMenu>
+<MudNavMenu Color="Color.Info" Style="font-size:1rem;">
+    <MudNavLink Icon="@Icons.Material.Filled.PersonAdd" Style="margin-top: 1rem;" IconColor="Color.Info" Href="/create-employee" Match="NavLinkMatch.Prefix">Mitarbeitererfassung</MudNavLink>
+    <MudNavLink Icon="@Icons.Material.Filled.PersonSearch" Href="/search-employee" IconColor="Color.Info" Match="NavLinkMatch.Prefix">Mitarbeitersuche</MudNavLink>
+    <MudNavLink Icon="@Icons.Material.Filled.ManageSearch" Href="/engine" IconColor="Color.Info" Match="NavLinkMatch.Prefix">Kenntnisbasierte Mitarbeitersuche</MudNavLink>
+</MudNavMenu>
 

@@ -1,57 +1,67 @@
 ﻿@page "/search-employee"
-@implements IDisposable
 @using SkillsDatabase
 @using SkillsBackend.Client
 @using Microsoft.EntityFrameworkCore
 @inject NavigationManager nav
-<h3>Mitarbeiter suchen</h3>
-
-<p>
-    Name:
-</p>
-
-<input type="text" name="searchbyname" @bind="SearchQuery" @bind:event="oninput" @onkeyup="InputChanged"/>
-
-<div>
-    <table>
-        
-        <thead>
-            <tr>
-                <th>Vorname</th>
-                <th>Nachname</th>
-                <th>Geburtsdatum</th>
-                <th/>
-            </tr>
-        </thead>
-        <tbody>
-        @foreach(var e in searchResult)
-        {
-            <tr>
-                <td>
-                    @e.FirstName
-                </td>
-                <td>
-                    @e.LastName
-                </td>
-                <td>
-                        @e.Birthday.ToShortDateString()
-                </td>
-                <td>
-                    <button type="button" @onclick="() => EditClick(e)">
-                            <img src="./Images/Icons/edit.png"> @*<a target="_blank" href="https://icons8.com/icon/102550/edit">Edit</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a>*@
-                    </button> 
-                </td>
-            </tr>
-        }
-        </tbody>
-    </table>
-</div>
 
 
+    <MudTable Items="@Employees" Class="ma-2" Elevation="3" Striped="true" Filter="new Func<Employee,bool>(FilterFunc1)" @bind-SelectedItem="selectedEmployee">
+        <ToolBarContent>
+            <MudText Typo="Typo.h6">Mitarbeitersuche</MudText>
+            <MudSpacer />
+            <MudTextField @bind-Value="searchString1" Immediate="true" Placeholder="Suchen" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+        </ToolBarContent>
+        <HeaderContent>
+            <MudTh>Vorname</MudTh>
+            <MudTh>Nachname</MudTh>
+            <MudTh>Geburtsdatum</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="Vorname">@context.FirstName</MudTd>
+            <MudTd DataLabel="Nachname">@context.LastName</MudTd>
+            <MudTd DataLabel="Geburtsdatum">@context.Birthday.ToShortDateString()</MudTd>
+        </RowTemplate>
+        <PagerContent>
+            <MudTablePager />
+        </PagerContent>
+    </MudTable>
 
 @code {
-    string searchQuery = String.Empty;
+    private string searchString1 = "";
+    private Employee selectedEmployee = null;
+    private List<Employee> Employees = new List<Employee>();
+    SkillsDbContext context = Program.dbContextFactory.CreateDbContext();
 
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        try
+        {
+            Employees = await Program.client.GetEmployeesAsync();
+
+        }
+        catch (InvalidOperationException ex)
+        {
+            Console.WriteLine(ex);
+        }
+    }
+
+    private bool FilterFunc1(Employee employee) => FilterFunc(employee, searchString1);
+
+    private bool FilterFunc(Employee employee, string searchString)
+    {
+        if (string.IsNullOrWhiteSpace(searchString))
+            return true;
+        if (employee.FirstName.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (employee.LastName.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        return false;
+    }
+
+    /*
+     
+    string searchQuery = String.Empty;
     string SearchQuery 
     {
         get => searchQuery;
@@ -100,4 +110,5 @@
     {
         context.Dispose();
     }
+     */
 }
