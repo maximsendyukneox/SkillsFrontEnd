@@ -5,7 +5,7 @@
 @inject NavigationManager nav
 
 
-    <MudTable Items="@Employees" Class="ma-2" Elevation="3" Striped="true" Filter="new Func<Employee,bool>(FilterFunc1)" @bind-SelectedItem="selectedEmployee">
+<MudTable Items="@Employees" Class="ma-2" Elevation="3" Loading="@loading" LoadingProgressColor="Color.Info" Striped="true" Filter="new Func<Employee,bool>(FilterFunc1)" @bind-SelectedItem="selectedEmployee">
         <ToolBarContent>
             <MudText Typo="Typo.h6">Mitarbeitersuche</MudText>
             <MudSpacer />
@@ -30,6 +30,7 @@
     private string searchString1 = "";
     private Employee selectedEmployee = null;
     private List<Employee> Employees = new List<Employee>();
+    private bool loading = true;
     SkillsDbContext context = Program.dbContextFactory.CreateDbContext();
 
     protected override async Task OnInitializedAsync()
@@ -38,7 +39,7 @@
         try
         {
             Employees = await Program.client.GetEmployeesAsync();
-
+            loading = false;
         }
         catch (InvalidOperationException ex)
         {
@@ -58,57 +59,4 @@
             return true;
         return false;
     }
-
-    /*
-     
-    string searchQuery = String.Empty;
-    string SearchQuery 
-    {
-        get => searchQuery;
-        set
-        {
-            searchQuery = value;
-            Task.Run(InputChanged);
-            StateHasChanged();
-
-        } 
-    }
-    List<Employee> searchResult = new List<Employee>();
-    SkillsDbContext context = Program.dbContextFactory.CreateDbContext();
-
-    protected override async Task OnInitializedAsync()
-    {
-        await base.OnInitializedAsync();
-
-        //searchResult = context.VisibleEmployees.ToList();
-        searchResult = await Program.client.GetEmployeesAsync();
-        searchResult.Sort((emp1, emp2) => String.Compare(emp1.FirstName, emp2.FirstName));
-    }
-
-    private async Task InputChanged()
-    {
-        if (SearchQuery is null || String.Empty == SearchQuery)
-        {
-            searchResult = await Program.client.GetEmployeesAsync();
-            searchResult.Sort((emp1, emp2) => String.Compare(emp1.FirstName, emp2.FirstName));
-            return;
-        }
-        //searchResult = context.VisibleEmployees.Where(emp => emp.FirstName.StartsWith(searchQuery) || emp.LastName.StartsWith(searchQuery)).ToList();
-        searchResult = await Program.client.GetEmployeeAsync(SearchQuery);
-        searchResult.Sort((emp1, emp2) => String.Compare(emp1.FirstName, emp2.FirstName));
-    }
-
-    private int id;
-
-    private void EditClick(Employee emp)
-    {
-        id = emp.Id;
-        nav.NavigateTo("/edit-employee/"+id);
-    }
-
-    public void Dispose()
-    {
-        context.Dispose();
-    }
-     */
 }

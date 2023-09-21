@@ -12,24 +12,36 @@
     <MudStack>
         <MudTextField Style="width:20rem;" OnKeyUp="onInputChanged" @bind-value="model.FirstName" For="@(()=> model.FirstName)" Label="Vorname" Variant="Variant.Outlined"></MudTextField>
         <MudTextField Style="width:20rem;" OnKeyUp="onInputChanged" @bind-Value="model.LastName" For="@(()=> model.LastName)" Label="Nachname" Variant="Variant.Outlined"></MudTextField>
-        <MudDatePicker Color="Color.Info" PickerOpened="onDatePickerOpened" Style="width:20rem;" ErrorText="Kein valides Datumsformat" Label="Geburtsdatum" @bind-Date="date" MaxDate="DateTime.Now" Variant="Variant.Outlined" Editable="true" />
-        <MudText Style="margin-top: 2rem;" Typo="Typo.h6">Kenntnisse</MudText>
-        @foreach (var proficiency in proficienciesDTO)
-        {
-        <MudList Clickable="false" DisableGutters="true" DisablePadding="true">
-            <MudListItem Text=@proficiency.SkillName />
-            <MudDivider/>        
-        </MudList>   
-        }
-        <MudGrid>
+        <MudDatePicker Placeholder="DD.MM.YYYY" DateFormat="dd.MM.yyyy" Color="Color.Info" PickerOpened="onDatePickerOpened" For="@(()=> model.Date)" Style="width:20rem;" ErrorText="Kein valides Datumsformat" Label="Geburtsdatum" @bind-Date="model.Date" MaxDate="DateTime.Now" Variant="Variant.Outlined" Editable="true" />
+      
+            <MudGrid>
             <MudItem >
-                <MudTextField Style="width:20rem;" @bind-Value="newProficiency" @onkeyup="AddNewProficiencyOnEnter" TextUpdateSuppression="false" Label="Kenntnis hinzufügen" Variant="Variant.Text"></MudTextField>
+                <MudTextField Style="width:20rem;" @bind-Value="newProficiency" @onkeyup="AddNewProficiencyOnEnter" TextUpdateSuppression="false" Label="Kenntnis" Variant="Variant.Outlined"></MudTextField>
             </MudItem>
-            <MudItem Style="padding:20px 0 0 0;">
+                <MudItem >
+                    <MudSelect Label="Stufe" Variant="Variant.Outlined" @bind-Value="proficiencyLevel" Style="width:20rem;">
+                        @foreach(ProficiencyLevel profLevel in Enum.GetValues(typeof(ProficiencyLevel)))
+                        {
+                            <MudSelectItem Value="@profLevel">@profLevel</MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudItem>
+            <MudItem Style="padding:1.5rem 0 0 0;">
                 <MudFab Color="Color.Info" StartIcon="@Icons.Material.Filled.Add" Size="Size.Small" @onclick="AddNewProficiency" />
-            </MudItem>
+            </MudItem>    
         </MudGrid>
-            <MudButton Style="width:8rem; margin-top: 4rem;" ButtonType="ButtonType.Submit" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Save" Color="Color.Info" Size="Size.Medium">Speichern</MudButton>
+
+            <MudTable Items="@proficienciesDTO" Elevation="0" Style="padding:0; margin-top:1rem;">
+        <HeaderContent>
+                    <MudTh Style="padding:16px 16px 16px 0;">Kenntnis</MudTh>
+                    <MudTh Style="padding:16px 16px 16px 0;">Stufe</MudTh>
+        </HeaderContent>
+        <RowTemplate Context="ctx" >
+                    <MudTd Style="padding:16px 16px 16px 0;" DataLabel="Kenntnis">@ctx.SkillName</MudTd>
+                    <MudTd Style="padding:16px 16px 16px 0;" DataLabel="Stufe">@ctx.SkillLevel</MudTd>
+        </RowTemplate>
+    </MudTable>  
+            <MudButton Style="width:8rem; margin-top: 4rem;border-radius: 1.1rem;" ButtonType="ButtonType.Submit" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Save" Color="Color.Info" Size="Size.Medium">Speichern</MudButton>
             @if (isError)
             {
             <MudAlert ShowCloseIcon="true"  Severity="Severity.Error">@ErrorText</MudAlert>
@@ -45,20 +57,18 @@
 
 @code {
     List<ProficiencyBaseDTO> proficienciesDTO = new();
-    private string newProficiency;
-    private List<string> proficiencies = new List<string>();
-    private DateTime? date = DateTime.Today;
+    private string newProficiency = String.Empty;
+    private ProficiencyLevel proficiencyLevel = ProficiencyLevel.Basic;
     private bool isError = false;
     private bool isSuccess = false;
     private string ErrorText { get; set; } = String.Empty;
     SaveEmployeeForm model = new SaveEmployeeForm();
 
-
     private void AddNewProficiency()
     {
         if (!string.IsNullOrWhiteSpace(newProficiency))
         {   
-            proficienciesDTO.Add(new(newProficiency, ProficiencyLevel.Basic));
+             proficienciesDTO.Add(new(newProficiency, proficiencyLevel));
         }
         newProficiency = string.Empty;
     }
@@ -89,7 +99,7 @@
         Employee employee = null;
         try
         {
-            employee = dbContext.CreateEmployee(model.FirstName, model.LastName, date!.Value, false);
+            employee = dbContext.CreateEmployee(model.FirstName, model.LastName, model.Date!.Value, false);
         }
         catch(ArgumentException ex)
         {
@@ -104,7 +114,6 @@
         await dbContext.SaveChangesAsync();
         isSuccess = true;
         model = new SaveEmployeeForm();
-        date = DateTime.Today;
         proficienciesDTO.Clear();
     }
     
