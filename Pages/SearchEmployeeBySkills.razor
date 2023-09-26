@@ -1,74 +1,155 @@
-﻿@page "/engine"
+﻿@page "/search-byskill"
 @using SkillsDatabase
-<h3>Kenntnisbasierte Mitarbeitersuche</h3> 
+@using System.Linq
+@using System.Collections.Generic
 
-<table>
-    <tr>
-        <td>
-
-            <SkillsComponent proficienciesDTO=@proficienciesDTO />
-        </td>
-    </tr>
-    <tr>
-        <td><button name="addskill" @onclick="AddSkill">Hinzufügen</button></td>
-        <td><button name="searchEmployees" @onclick="SearchEmployees">Suchen</button></td>
-    </tr>
-</table>
-<table>
-    <thead>
-        <tr>
-            <th>Vorname</th>
-            <th>Nachname</th>
-            <th>Kenntnis</th>
-            <th>Stufe</th>
-        </tr>
-    </thead>
-    <tbody>
-        @{
-            Employee? owner = null;
-            foreach (var p in searchResult)
-            {
-                <tr>
-                    <td>
-                        @if (owner != p.Owner || searchResult.IndexOf(p) == 0)
-                        {
-                            @p.Owner.FirstName
-                        }
-                    </td>
-                    <td>
-                        @if (owner != p.Owner || searchResult.IndexOf(p) == 0)
-                        {
-                            @p.Owner.LastName
-                        }
-                    </td>
-                    <td>
-                        @p.Skill.Name
-                    </td>
-                    <td>
-                        @p.Level
-                    </td>
-                </tr>
-                owner = p.Owner;
-            }
-        }
-    </tbody>
-</table>
+<MudPaper Class="pa-8 ma-2" Elevation="3">
+    <MudGrid>
+        <MudItem xs="12" Style="margin-bottom:1rem;">
+            <MudText Typo="Typo.h6">Kenntnisbasierte Mitarbeitersuche</MudText>
+            <MudDivider/>
+        </MudItem>
+        <MudItem>
+            <MudAutocomplete T="string" Label="Kenntnis" Text="@proficiency" Value="@proficiency" ValueChanged="OnProficiencyChanged" SearchFunc="@SearchProficiency"
+                             MaxItems="null" Style="width:20rem;" Variant="Variant.Outlined" Error="@isError" ErrorText="@error" CoerceValue="true" CoerceText="true" />
+        </MudItem>
+        <MudItem>
+            <MudSelect T="ProficiencyLevel" Value="proficiencyLevel" Label="Stufe" Variant="Variant.Outlined" ValueChanged="OnProficiencyLvlChanged" Style="width:20rem;" >
+                @foreach (ProficiencyLevel profLevel in Enum.GetValues(typeof(ProficiencyLevel)))
+                {
+                    <MudSelectItem Value="@profLevel">@profLevel</MudSelectItem>
+                }
+            </MudSelect>
+        </MudItem>
+        <MudItem Style="padding:1.5rem 0 0 0;">
+            <MudFab Color="Color.Info" StartIcon="@Icons.Material.Filled.Add" Size="Size.Small" @onclick="AddProficiency" />
+        </MudItem>
+        <MudItem>
+            <MudTable Items="@proficienciesDTO" Elevation="0" Style="padding:0; margin-top:1rem; width:45rem;">
+                <HeaderContent>
+                    <MudTh Style="padding:10px 10px 10px 0;">Kenntnis</MudTh>
+                    <MudTh Style="padding:10px 10px 10px 0;">Stufe</MudTh>
+                    <MudTh Style="padding:10px 10px 10px 0;"></MudTh>
+                </HeaderContent>
+                <RowTemplate Context="ctx">
+                    <MudTd Style="padding:10px 10px 10px 0;" DataLabel="Kenntnis">@ctx.SkillName</MudTd>
+                    <MudTd Style="padding:10px 10px 10px 0;" DataLabel="Stufe">@ctx.SkillLevel</MudTd>
+                    <MudTd Style="padding:10px 10px 10px 0;" DataLabel="Stufe"><MudIconButton Icon="@Icons.Material.Filled.Clear" aria-label="delete" @onclick="@(()=>RemoveProficiency(ctx))" Color="Color.Error"></MudIconButton></MudTd>
+                </RowTemplate>
+            </MudTable>
+        </MudItem>
+        <MudItem xs="12">
+            <MudButton Style="width:8rem; margin-top: 1rem;border-radius: 1.1rem;" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Search" Color="Color.Info" Size="Size.Medium">Suchen</MudButton>
+        </MudItem>
+        <MudItem xs="12" Style="padding:0;margin-top:5rem;">
+            <MudTable Items="@Employees" Elevation="0" Class="ma-2" Loading="@loading" LoadingProgressColor="Color.Info" Striped="true" Filter="new Func<Employee,bool>(FilterFunc1)" @bind-SelectedItem="selectedEmployee">
+                <ToolBarContent>
+                    <MudText Typo="Typo.h6">Suchergebnisse</MudText>
+                    <MudSpacer />
+                    <MudTextField @bind-Value="searchString" Immediate="true" Placeholder="Suchen" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+                </ToolBarContent>
+                <HeaderContent>
+                    <MudTh>Vorname</MudTh>
+                    <MudTh>Nachname</MudTh>
+                    <MudTh>Geburtsdatum</MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd DataLabel="Vorname">@context.FirstName</MudTd>
+                    <MudTd DataLabel="Nachname">@context.LastName</MudTd>
+                    <MudTd DataLabel="Geburtsdatum">@context.Birthday.ToShortDateString()</MudTd>
+                </RowTemplate>
+                <PagerContent>
+                    <MudTablePager />
+                </PagerContent>
+            </MudTable>
+        </MudItem>
+    </MudGrid>
+</MudPaper>
 
 @code {
-    SkillsDbContext context = Program.dbContextFactory.CreateDbContext();
+    SkillsDbContext dbContext = Program.dbContextFactory.CreateDbContext();
     List<ProficiencyBaseDTO> proficienciesDTO = new();
     List<Proficiency> searchResult = new List<Proficiency>();
+    private ProficiencyLevel proficiencyLevel = ProficiencyLevel.Basic;
+    private string proficiency = "";
+    private bool isError = false;
+    private string error = "";
+    private string searchString = "";
+    private Employee selectedEmployee = null;
+    private List<Employee> Employees = new List<Employee>();
+    private bool loading = false;
 
-    private void AddSkill()
+    private string[] proficiencies =
     {
-        Console.WriteLine("AddSkill: ");
-        proficienciesDTO.Add(new(string.Empty, ProficiencyLevel.Basic));
+        "Alabama", "Alaska", "American Samoa", "Arizona",
+        "Arkansas", "California", "Colorado", "Connecticut",
+        "Delaware", "District of Columbia", "Federated States of Micronesia",
+        "Florida", "Georgia", "Guam", "Hawaii", "Idaho",
+        "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky",
+        "Louisiana", "Maine", "Marshall Islands", "Maryland",
+        "Massachusetts", "Michigan", "Minnesota", "Mississippi",
+        "Missouri", "Montana", "Nebraska", "Nevada",
+        "New Hampshire", "New Jersey", "New Mexico", "New York",
+        "North Carolina", "North Dakota", "Northern Mariana Islands", "Ohio",
+        "Oklahoma", "Oregon", "Palau", "Pennsylvania", "Puerto Rico",
+        "Rhode Island", "South Carolina", "South Dakota", "Tennessee",
+        "Texas", "Utah", "Vermont", "Virgin Island", "Virginia",
+        "Washington", "West Virginia", "Wisconsin", "Wyoming",
+    };
+
+    private void AddProficiency()
+    {
+        if (string.IsNullOrEmpty(proficiency))
+            return;
+
+        if ((proficienciesDTO.Any(p => p.SkillName == proficiency)))
+        {
+            error = "Kenntnis bereits hinzugefügt";
+            isError = true;
+            return;
+        };
+        proficienciesDTO.Add(new(proficiency, proficiencyLevel));
+        proficiency = String.Empty;
     }
 
-    private void SearchEmployees()
+    private void OnProficiencyLvlChanged(ProficiencyLevel selectedLevel)
     {
-        Console.WriteLine("SearchEmployees: ");
-        proficienciesDTO = proficienciesDTO.FindAll(p => p.SkillName != String.Empty);
-        searchResult = context.GetProficiencies(proficienciesDTO);
+        proficiencyLevel = selectedLevel;
+        isError = false;
+    }
+
+    private void OnProficiencyChanged(string selectedProficiency)
+    {
+        proficiency = selectedProficiency;
+        isError = false;
+    }
+
+    private void RemoveProficiency(ProficiencyBaseDTO rowData)
+    {
+        proficienciesDTO.RemoveAll(dto => dto.SkillName == rowData.SkillName && dto.SkillLevel == rowData.SkillLevel);
+    }
+
+    private async Task<IEnumerable<string>> SearchProficiency(string value)
+    {
+        // In real life use an asynchronous function for fetching data from an api.
+        await Task.Delay(5);
+
+        // if text is null or empty, show complete list
+        if (string.IsNullOrEmpty(value))
+            return proficiencies;
+        return proficiencies.Where(x => x.Contains(value, StringComparison.InvariantCultureIgnoreCase));
+    }
+
+    private bool FilterFunc1(Employee employee) => FilterFunc(employee, searchString);
+
+    private bool FilterFunc(Employee employee, string searchString)
+    {
+        if (string.IsNullOrWhiteSpace(searchString))
+            return true;
+        if (employee.FirstName.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (employee.LastName.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        return false;
     }
 }
