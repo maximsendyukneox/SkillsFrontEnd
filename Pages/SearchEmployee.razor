@@ -15,11 +15,13 @@
             <MudTh>Vorname</MudTh>
             <MudTh>Nachname</MudTh>
             <MudTh>Geburtsdatum</MudTh>
+            <MudTh>Aktion</MudTh>
         </HeaderContent>
         <RowTemplate>
             <MudTd DataLabel="Vorname">@context.FirstName</MudTd>
             <MudTd DataLabel="Nachname">@context.LastName</MudTd>
             <MudTd DataLabel="Geburtsdatum">@context.Birthday.ToShortDateString()</MudTd>
+            <MudTd DataLabel="Stufe"><MudIconButton Icon="@Icons.Material.Filled.Edit" aria-label="edit employee" @onclick="@(()=>EditEmployee(context))"></MudIconButton></MudTd>
         </RowTemplate>
         <PagerContent>
             <MudTablePager />
@@ -58,5 +60,10 @@
         if (employee.LastName.Contains(searchString, StringComparison.OrdinalIgnoreCase))
             return true;
         return false;
+    }
+
+    private void EditEmployee(Employee employee)
+    {
+        nav.NavigateTo($"/edit-employee/{employee.Id}");
     }
 }

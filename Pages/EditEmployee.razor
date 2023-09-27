@@ -1,231 +1,331 @@
 ﻿@page "/edit-employee/{Id}"
-@implements IDisposable
+@* @implements IDisposable *@
 @inject NavigationManager nav
 @using SkillsDatabase
 @using Microsoft.Data.SqlClient
-<h3>Mitarbeiterdaten ändern</h3>
 
-<div>
-    <table>
-        <tr>
-            <td>Vorname:</td>
-            <td>
-                <input type="text" name="fname" @bind-value="fname" @bind-value:event="oninput" />
-            </td>
-        </tr>
-        <tr>
-            <td>Nachname:</td>
-            <td>
-                <input type="text" name="lname" @bind-value="lname" @bind-value:event="oninput" />
-            </td>
-        </tr>
-        <tr>
-            <td>Geburtsdatum:</td>
-            <td>
-                @dateOfBirth.ToShortDateString()
-            </td>
-        </tr>
-    </table>
-</div>
 
-<div>
-    <table>
-        <tr>
-            <td><button name="deleteemployee" @onclick="DeleteEmployee_Click">Mitarbeiter löschen</button></td>
-        </tr>
-    </table>
-</div>
+<EditForm Model="@model" OnValidSubmit="SaveEmployee">
+    <DataAnnotationsValidator />
+    <MudPaper Class="pa-8 ma-2" Elevation="3">
+        <MudText Typo="Typo.h6">Mitarbeiterdaten ändern</MudText>
+        <MudDivider Style="margin-bottom: 2rem;" />
+        <MudStack>
+            <MudTextField Style="width:20rem;" OnKeyUp="OnInputChanged" @bind-Value="model.FirstName" For="@(()=> model.FirstName)" Label="Vorname" Variant="Variant.Outlined"></MudTextField>
+            <MudTextField Style="width:20rem;" OnKeyUp="OnInputChanged" @bind-Value="model.LastName" For="@(()=> model.LastName)" Label="Nachname" Variant="Variant.Outlined"></MudTextField>
+            <MudDatePicker Placeholder="DD.MM.YYYY" DateFormat="dd.MM.yyyy" Color="Color.Info" PickerOpened="OnDatePickerOpened" For="@(()=> model.Date)" Style="width:20rem;" ErrorText="Kein valides Datumsformat" Label="Geburtsdatum" @bind-Date="model.Date" MaxDate="DateTime.Now" Variant="Variant.Outlined" Editable="true" />
 
-<div>
-    <table>
-        <tr>
-            <td>
+            <MudGrid>
+                <MudItem>
+                    <MudAutocomplete T="string" Label="Kenntnis" Text="@newProficiency" Value="@newProficiency" ValueChanged="OnProficiencyChanged" SearchFunc="@SearchProficiency"
+                                     MaxItems="null" Style="width:20rem;" Variant="Variant.Outlined" Error="@isError" ErrorText="@error" CoerceText="true" CoerceValue="true" />
+                </MudItem>
+                <MudItem>
+                    <MudSelect Label="Stufe" Variant="Variant.Outlined" @bind-Value="proficiencyLevel" Style="width:20rem;">
+                        @foreach (ProficiencyLevel profLevel in Enum.GetValues(typeof(ProficiencyLevel)))
+                        {
+                            <MudSelectItem Value="@profLevel">@profLevel</MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudItem>
+                <MudItem Style="padding:1.5rem 0 0 0;">
+                    <MudFab Color="Color.Info" StartIcon="@Icons.Material.Filled.Add" Size="Size.Small" @onclick="AddNewProficiency" />
+                </MudItem>
+            </MudGrid>
 
-                <table>
-                    
-                    <tbody>
-                        <tr>
-                            <td>
-                                <SkillsComponent proficienciesDTO="proficiencyDTOs" />
-                            </td>
-                            <td>
-                                <table>
-                                    <tr/>
-                                    @foreach (var pDTO in proficiencyDTOs)
-                                    {
-                                        <tr>
-                                            <td>
-                                                <button name="delete" @onclick="() => DeleteProficiency(pDTO)">
-                                                    <img src="./Images/Icons/delete.png" > @*<a target="_blank" href="https://icons8.com/icon/102550/remove">Delete</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a>*@
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    }
-                                </table>
-                            </td>
-                            <td>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </td>
-            <td>
-                <table>
-                    <tr>
-                        <td><button name="addskill" @onclick="AddProficiency">Kenntnis hinzufügen</button></td>
-                    </tr>
-                </table>
-            </td>
-        </tr>
-    </table>
-</div>
-
-<div>
-    <p style="color:red">@Error</p>
-</div>
-
-<div>
-    <button name="savechanges" @onclick="SaveChanges">Speichern</button>
-</div>
-
-<div>
-    <p style="color:green">@Message</p>
-</div>
+            <MudTable Items="@proficienciesDTO" Elevation="0" Style="padding:0; margin-top:1rem; width:45rem;">
+                <HeaderContent>
+                    <MudTh Style="padding:10px 10px 10px 0;">Kenntnis</MudTh>
+                    <MudTh Style="padding:10px 10px 10px 0;">Stufe</MudTh>
+                    <MudTh Style="padding:10px 10px 10px 0;"></MudTh>
+                </HeaderContent>
+                <RowTemplate Context="ctx">
+                    <MudTd Style="padding:10px 10px 10px 0;" DataLabel="Kenntnis">@ctx.SkillName</MudTd>
+                    <MudTd Style="padding:10px 10px 10px 0;" DataLabel="Stufe">@ctx.SkillLevel</MudTd>
+                    <MudTd Style="padding:10px 10px 10px 0;" DataLabel="Stufe"><MudIconButton Icon="@Icons.Material.Filled.Clear" aria-label="delete" @onclick="@(()=>RemoveProficiency(ctx))" Color="Color.Error"></MudIconButton></MudTd>
+                </RowTemplate>
+            </MudTable>
+            <MudStack Row="true" Justify="Justify.FlexStart" Style="margin-top: 4rem;">
+            <MudButton Style="width:8rem; border-radius: 1.1rem;" ButtonType="ButtonType.Submit" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Save" Color="Color.Info" Size="Size.Medium">Speichern</MudButton>
+            <MudButton Style="width:8rem; border-radius: 1.1rem;" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Delete" Color="Color.Error" @onclick="DeleteEmployee" Size="Size.Medium">Löschen</MudButton>
+            </MudStack>
+            @if (isException)
+            {
+                <MudAlert ShowCloseIcon="true" Severity="Severity.Error">@ErrorText</MudAlert>
+            }
+            @if (isSuccess)
+            {
+                <MudAlert Style="margin-top: 2rem;" Severity="Severity.Success">Speichern erfolgreich</MudAlert>
+            }
+        </MudStack>
+    </MudPaper>
+</EditForm>
 
 @code {
+
+    [Inject] private IDialogService DialogService { get; set; }
+    List<ProficiencyBaseDTO> proficienciesDTO = new();
+    private string newProficiency = String.Empty;
+    private ProficiencyLevel proficiencyLevel = ProficiencyLevel.Basic;
+    private bool isError = false;
+    private bool isException = false;
+    private string error = "";
+    private bool isSuccess = false;
+    private string ErrorText { get; set; } = String.Empty;
+    SaveEmployeeForm model = new SaveEmployeeForm();
+    List<Proficiency> tableData = new();
+    SkillsDbContext context = Program.dbContextFactory.CreateDbContext();
+    List<Proficiency> employeeProficiencies = new();
+    Employee employee = new();
+    private List<string> proficiencies = new();
+
     [Parameter]
-    public string Id { get; set; }
+    public string Id { get; set; } = "";
 
-    //SkillsDbContext context;
-    Employee employee;
 
-    List<ProficiencyBaseDTO> proficiencyDTOs = new();
-    List<Proficiency> proficiencies;
+    private void OnInputChanged(KeyboardEventArgs e)
+    {
+        isSuccess = false;
+    }
 
-    string fname { get; set; }
-    string lname { get; set; }
+    private void OnDatePickerOpened()
+    {
+        isSuccess = false;
+    }
 
-    DateTime dateOfBirth { get; set; }
+    private void OnProficiencyChanged(string selectedProficiency)
+    {
+        newProficiency = selectedProficiency;
+        isError = false;
+    }
 
-    SkillsDbContext context;
+    private async Task<IEnumerable<string>> SearchProficiency(string value)
+    {
+        // In real life use an asynchronous function for fetching data from an api.
+        await Task.Delay(5);
 
-    private string Error { get; set; } = String.Empty;
-    private string Message { get; set; } = String.Empty;
+        // if text is null or empty, show complete list
+        if (string.IsNullOrEmpty(value))
+            return proficiencies;
+        return proficiencies.Where(x => x.Contains(value, StringComparison.InvariantCultureIgnoreCase));
+    }
 
+    private void AddNewProficiency()
+    {
+        if (string.IsNullOrEmpty(newProficiency))
+            return;
+
+        if ((proficienciesDTO.Any(p => p.SkillName == newProficiency)))
+        {
+            error = "Kenntnis bereits hinzugefügt";
+            isError = true;
+            return;
+        };
+
+        proficienciesDTO.Add(new(newProficiency, proficiencyLevel));
+        newProficiency = string.Empty;
+    }
+
+    private void RemoveProficiency(ProficiencyBaseDTO rowData)
+    {
+        proficienciesDTO.RemoveAll(dto => dto.SkillName == rowData.SkillName && dto.SkillLevel == rowData.SkillLevel);
+    }
 
     protected async override Task OnInitializedAsync()
     {
-        context = Program.dbContextFactory.CreateDbContext();
         employee = await Program.client.GetEmployeeAsync(Convert.ToInt32(Id));
+        model.FirstName = employee.FirstName;
+        model.LastName = employee.LastName;
+        model.Date = employee.Birthday;
 
-        fname = employee.FirstName;
-        lname = employee.LastName;
-        dateOfBirth = employee.Birthday;
-        proficiencies = await Program.client.GetProficiencyAsync(employee.Id);
+        employeeProficiencies = await Program.client.GetProficiencyAsync(employee.Id);
 
+        proficiencies = await Program.client.GetSkillsAsync();
 
-        foreach(var p in proficiencies)
+        foreach (var p in employeeProficiencies)
         {
-            proficiencyDTOs.Add(new ProficiencyBaseDTO(p.Skill.Name, p.Level));
+            proficienciesDTO.Add(new ProficiencyBaseDTO(p.Skill.Name, p.Level));
         }
-
         await base.OnInitializedAsync();
     }
 
-    private async Task UpdateCredentials()
+    private async Task DeleteEmployee()
     {
-        await Program.client.UpdateEmployeeAsync(new EmployeeDTO(fname, lname, dateOfBirth.ToShortDateString(), Convert.ToInt32(Id)));
+        bool? result = await DialogService.ShowMessageBox(
+            "Achtung",
+            "Diesen Mitarbeiter wirklich löschen?",
+            yesText: "Löschen", cancelText: "Abbrechen");
 
+        if (result == null)
+            return;
+        else
+        {
+            await Program.client.DeleteEmployeeAsync(employee.Id);
+            nav.NavigateTo("/search-employee");
+        }
+        StateHasChanged();
     }
 
-    private void DeleteProficiency(ProficiencyBaseDTO pDTO)
+    private async Task SaveEmployee(EditContext context)
     {
-        context.VisibleProficiencies.Remove(context.VisibleProficiencies.Single(prof => prof.Skill.Name == pDTO.SkillName && prof.Owner == employee));
-        proficiencyDTOs.Remove(proficiencyDTOs.Single(p => p.SkillName == pDTO.SkillName));
-    }
-
-    private async Task DeleteEmployee_Click()
-    {
-        await Program.client.DeleteEmployeeAsync(employee.Id);
-        nav.NavigateTo("/search-employee");
-    }
-
-    private bool skillAdded = false;
-
-
-
-    private void AddProficiency()
-    {
-        proficiencyDTOs.Add(
-            new ProficiencyBaseDTO(
-                String.Empty,
-                ProficiencyLevel.Basic
-            )
-        );
-
-
-        skillAdded = true;
-    }
-
-    private async Task SaveChanges()
-    {
+        StateHasChanged();
+        SkillsDbContext dbContext = Program.dbContextFactory.CreateDbContext();
+        Employee employee = null;
         try
         {
-            InputChecker.ValidateName(fname);
-            InputChecker.ValidateName(lname);
+            employee = dbContext.CreateEmployee(model.FirstName, model.LastName, model.Date!.Value, false);
         }
-        catch(ArgumentException ex)
+        catch (ArgumentException ex)
         {
-            if (ex.Message == "Special characters are not allowed")
-            {
-                Error = " Sonderzeichen im Namen sind nicht erlaubt!";
-                return;
-            }
-            else if (ex.Message == "The name must not be empty")
-            {
-                Error = " Weder Vorname noch Nachname darf leer sein!";
-                return;
-            }
-            else throw;
+            isException = true;
+            ErrorText = ex.Message;
+            return;
         }
-
-        await UpdateCredentials();
-
-        try
+        foreach (var proficiencyDTO in proficienciesDTO)
         {
-            foreach(var prof in proficiencyDTOs)
-            {
-                InputChecker.ValidateSkill(prof.SkillName);
-            }
+            dbContext.CreateProficiency(proficiencyDTO.SkillName, proficiencyDTO.SkillLevel, employee, false);
         }
-        catch(ArgumentException ex)
-        {
-            if (ex.Message == "The name must not be empty")
-            {
-                Error = " Kenntnisnamen dürfen nicht leer sein";
-                return;
-            }
-            else throw;
-        }
-        //TODO: insert Proficienty-Update-Methods calls here 
-
-        Message = " Änderungen wurden gespeichert!";
+        await dbContext.SaveChangesAsync();
+        isSuccess = true;
+        model = new SaveEmployeeForm();
+        proficienciesDTO.Clear();
     }
 
-    public void Dispose()
-    {
-        if (skillAdded)
-        {
-            context.CreateProficiency(proficiencyDTOs.Last().SkillName, proficiencyDTOs.Last().SkillLevel, employee, true);
-            proficiencies.Add(context.VisibleProficiencies.Single(p => p.Owner == employee && p.Skill.Name == proficiencyDTOs.Last().SkillName));
+
+
+    // [Parameter]
+    // public string Id { get; set; }
+
+    // //SkillsDbContext context;
+    // Employee employee;
+
+    // List<ProficiencyBaseDTO> proficiencyDTOs = new();
+    // List<Proficiency> proficiencies;
+
+    // string fname { get; set; }
+    // string lname { get; set; }
+
+    // DateTime dateOfBirth { get; set; }
+
+    // SkillsDbContext context;
+
+    // private string Error { get; set; } = String.Empty;
+    // private string Message { get; set; } = String.Empty;
+
+
+    // protected async override Task OnInitializedAsync()
+    // {
+    //     context = Program.dbContextFactory.CreateDbContext();
+    //     employee = await Program.client.GetEmployeeAsync(Convert.ToInt32(Id));
+
+    //     fname = employee.FirstName;
+    //     lname = employee.LastName;
+    //     dateOfBirth = employee.Birthday;
+    //     proficiencies = await Program.client.GetProficiencyAsync(employee.Id);
+
+
+    //     foreach(var p in proficiencies)
+    //     {
+    //         proficiencyDTOs.Add(new ProficiencyBaseDTO(p.Skill.Name, p.Level));
+    //     }
+
+    //     await base.OnInitializedAsync();
+    // }
+
+    // private async Task UpdateCredentials()
+    // {
+    //     await Program.client.UpdateEmployeeAsync(new EmployeeDTO(fname, lname, dateOfBirth.ToShortDateString(), Convert.ToInt32(Id)));
+
+    // }
+
+    // private void DeleteProficiency(ProficiencyBaseDTO pDTO)
+    // {
+    //     context.VisibleProficiencies.Remove(context.VisibleProficiencies.Single(prof => prof.Skill.Name == pDTO.SkillName && prof.Owner == employee));
+    //     proficiencyDTOs.Remove(proficiencyDTOs.Single(p => p.SkillName == pDTO.SkillName));
+    // }
+
+    // private async Task DeleteEmployee_Click()
+    // {
+    //     await Program.client.DeleteEmployeeAsync(employee.Id);
+    //     nav.NavigateTo("/search-employee");
+    // }
+
+    // private bool skillAdded = false;
+
+
+
+    // private void AddProficiency()
+    // {
+    //     proficiencyDTOs.Add(
+    //         new ProficiencyBaseDTO(
+    //             String.Empty,
+    //             ProficiencyLevel.Basic
+    //         )
+    //     );
+
+
+    //     skillAdded = true;
+    // }
+
+    // private async Task SaveChanges()
+    // {
+    //     try
+    //     {
+    //         InputChecker.ValidateName(fname);
+    //         InputChecker.ValidateName(lname);
+    //     }
+    //     catch(ArgumentException ex)
+    //     {
+    //         if (ex.Message == "Special characters are not allowed")
+    //         {
+    //             Error = " Sonderzeichen im Namen sind nicht erlaubt!";
+    //             return;
+    //         }
+    //         else if (ex.Message == "The name must not be empty")
+    //         {
+    //             Error = " Weder Vorname noch Nachname darf leer sein!";
+    //             return;
+    //         }
+    //         else throw;
+    //     }
+
+    //     await UpdateCredentials();
+
+    //     try
+    //     {
+    //         foreach(var prof in proficiencyDTOs)
+    //         {
+    //             InputChecker.ValidateSkill(prof.SkillName);
+    //         }
+    //     }
+    //     catch(ArgumentException ex)
+    //     {
+    //         if (ex.Message == "The name must not be empty")
+    //         {
+    //             Error = " Kenntnisnamen dürfen nicht leer sein";
+    //             return;
+    //         }
+    //         else throw;
+    //     }
+    //     //TODO: insert Proficienty-Update-Methods calls here 
+
+    //     Message = " Änderungen wurden gespeichert!";
+    // }
+
+    // public void Dispose()
+    // {
+    //     if (skillAdded)
+    //     {
+    //         context.CreateProficiency(proficiencyDTOs.Last().SkillName, proficiencyDTOs.Last().SkillLevel, employee, true);
+    //         proficiencies.Add(context.VisibleProficiencies.Single(p => p.Owner == employee && p.Skill.Name == proficiencyDTOs.Last().SkillName));
             
-        }
-        foreach(var pDTO in proficiencyDTOs)
-        {
-            Proficiency proficiency = proficiencies[proficiencyDTOs.IndexOf(pDTO)];
-            //context.RenameSkill(context.Skills.Single(s => s == proficiency.Skill),pDTO.SkillName);
-            context.ModifyProficiency(context.VisibleProficiencies.Single(p => p == proficiency), pDTO.SkillLevel);
-        }
+    //     }
+    //     foreach(var pDTO in proficiencyDTOs)
+    //     {
+    //         Proficiency proficiency = proficiencies[proficiencyDTOs.IndexOf(pDTO)];
+    //         //context.RenameSkill(context.Skills.Single(s => s == proficiency.Skill),pDTO.SkillName);
+    //         context.ModifyProficiency(context.VisibleProficiencies.Single(p => p == proficiency), pDTO.SkillLevel);
+    //     }
         
-    }
+    // }
 }
