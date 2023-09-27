@@ -39,10 +39,10 @@
             </MudTable>
         </MudItem>
         <MudItem xs="12" Style="margin-top:2rem;">
-            <MudButton Style="width:8rem; margin-top: 1rem;border-radius: 1.1rem;" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Search" Color="Color.Info" Size="Size.Medium">Suchen</MudButton>
+            <MudButton Style="width:8rem; margin-top: 1rem;border-radius: 1.1rem;" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Search" @onclick="SearchEmployees" Color="Color.Info" Size="Size.Medium">Suchen</MudButton>
         </MudItem>
         <MudItem xs="12" Style="padding:0;margin-top:2rem;">
-            <MudTable Items="@Employees" Elevation="0" Class="ma-2" Loading="@loading" LoadingProgressColor="Color.Info" Striped="true" Filter="new Func<Employee,bool>(FilterFunc1)" @bind-SelectedItem="selectedEmployee">
+            <MudTable Items="@searchResult" Elevation="0" Class="ma-2" Loading="@loading" LoadingProgressColor="Color.Info" Striped="true" Filter="new Func<Proficiency,bool>(FilterFunc1)">
                 <ToolBarContent>
                     <MudText Typo="Typo.h6">Suchergebnisse</MudText>
                     <MudSpacer />
@@ -52,11 +52,15 @@
                     <MudTh>Vorname</MudTh>
                     <MudTh>Nachname</MudTh>
                     <MudTh>Geburtsdatum</MudTh>
+                    <MudTh>Kenntnis</MudTh>
+                    <MudTh>Stufe</MudTh>
                 </HeaderContent>
                 <RowTemplate>
-                    <MudTd DataLabel="Vorname">@context.FirstName</MudTd>
-                    <MudTd DataLabel="Nachname">@context.LastName</MudTd>
-                    <MudTd DataLabel="Geburtsdatum">@context.Birthday.ToShortDateString()</MudTd>
+                    <MudTd DataLabel="Vorname">@context.Owner.FirstName</MudTd>
+                    <MudTd DataLabel="Nachname">@context.Owner.LastName</MudTd>
+                    <MudTd DataLabel="Geburtsdatum">@context.Owner.Birthday.ToShortDateString()</MudTd>
+                    <MudTd DataLabel="Kenntnis">@context.Skill.Name</MudTd>
+                    <MudTd DataLabel="Stufe">@context.Level</MudTd>
                 </RowTemplate>
                 <PagerContent>
                     <MudTablePager />
@@ -137,16 +141,26 @@
         return proficiencies.Where(x => x.Contains(value, StringComparison.InvariantCultureIgnoreCase));
     }
 
-    private bool FilterFunc1(Employee employee) => FilterFunc(employee, searchString);
+    private bool FilterFunc1(Proficiency proficiency) => FilterFunc(proficiency, searchString);
 
-    private bool FilterFunc(Employee employee, string searchString)
+    private bool FilterFunc(Proficiency proficiency, string searchString)
     {
         if (string.IsNullOrWhiteSpace(searchString))
             return true;
-        if (employee.FirstName.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+        if (proficiency.Owner.FirstName.Contains(searchString, StringComparison.OrdinalIgnoreCase))
             return true;
-        if (employee.LastName.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+        if (proficiency.Owner.LastName.Contains(searchString, StringComparison.OrdinalIgnoreCase))
             return true;
         return false;
+    }
+
+    private async Task SearchEmployees()
+    {
+        var filteredEmployees = await Program.client.ProficiencyBasedSearchEngine(proficienciesDTO);
+        searchResult.RemoveAll(p => true);
+        foreach (var employee in filteredEmployees)
+        {
+            searchResult.AddRange(await Program.client.GetProficiencyAsync(employee.Id));
+        }
     }
 }
