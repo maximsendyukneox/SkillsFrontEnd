@@ -5,27 +5,27 @@
 
 <MudPaper Class="pa-8 ma-2" Elevation="3">
     <MudGrid>
-        <MudItem xs="12" Style="margin-bottom:1rem;">
+        <MudItem xs="12">
             <MudText Typo="Typo.h6">Kenntnisbasierte Mitarbeitersuche</MudText>
             <MudDivider/>
         </MudItem>
         <MudItem>
-            <MudAutocomplete T="string" Label="Kenntnis" Text="@proficiency" Value="@proficiency" ValueChanged="OnProficiencyChanged" SearchFunc="@SearchProficiency"
-                             MaxItems="null" Style="width:20rem;" Variant="Variant.Outlined" Error="@isError" ErrorText="@error" CoerceValue="true" CoerceText="true" />
+            <MudAutocomplete Style="width:20rem;" T="string" Label="Kenntnis" Text="@proficiency" Value="@proficiency" ValueChanged="OnProficiencyChanged" SearchFunc="@SearchProficiency"
+                                 MaxItems="null" Variant="Variant.Outlined" Error="@isError" ErrorText="@error" CoerceValue="true" CoerceText="true"/>
         </MudItem>
         <MudItem>
-            <MudSelect T="ProficiencyLevel" Value="proficiencyLevel" Label="Stufe" Variant="Variant.Outlined" ValueChanged="OnProficiencyLvlChanged" Style="width:20rem;" >
-                @foreach (ProficiencyLevel profLevel in Enum.GetValues(typeof(ProficiencyLevel)))
-                {
-                    <MudSelectItem Value="@profLevel">@profLevel</MudSelectItem>
-                }
-            </MudSelect>
+            <MudSelect Style="width:20rem;" T="ProficiencyLevel" Value="proficiencyLevel" Label="Stufe" Variant="Variant.Outlined" ValueChanged="OnProficiencyLvlChanged">
+                    @foreach (ProficiencyLevel profLevel in Enum.GetValues(typeof(ProficiencyLevel)))
+                    {
+                        <MudSelectItem Value="@profLevel">@profLevel</MudSelectItem>
+                    }
+                </MudSelect>
         </MudItem>
         <MudItem Style="padding:1.5rem 0 0 0;">
             <MudFab Color="Color.Info" StartIcon="@Icons.Material.Filled.Add" Size="Size.Small" @onclick="AddProficiency" />
         </MudItem>
-        <MudItem>
-            <MudTable Items="@proficienciesDTO" Elevation="0" Style="padding:0; margin-top:1rem; width:45rem;">
+        <MudItem xs="12">
+            <MudTable Items="@proficienciesDTO" Elevation="0" Style="padding:0; width:45rem;">
                 <HeaderContent>
                     <MudTh Style="padding:10px 10px 10px 0;">Kenntnis</MudTh>
                     <MudTh Style="padding:10px 10px 10px 0;">Stufe</MudTh>
@@ -38,10 +38,10 @@
                 </RowTemplate>
             </MudTable>
         </MudItem>
-        <MudItem xs="12">
+        <MudItem xs="12" Style="margin-top:2rem;">
             <MudButton Style="width:8rem; margin-top: 1rem;border-radius: 1.1rem;" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Search" Color="Color.Info" Size="Size.Medium">Suchen</MudButton>
         </MudItem>
-        <MudItem xs="12" Style="padding:0;margin-top:5rem;">
+        <MudItem xs="12" Style="padding:0;margin-top:2rem;">
             <MudTable Items="@Employees" Elevation="0" Class="ma-2" Loading="@loading" LoadingProgressColor="Color.Info" Striped="true" Filter="new Func<Employee,bool>(FilterFunc1)" @bind-SelectedItem="selectedEmployee">
                 <ToolBarContent>
                     <MudText Typo="Typo.h6">Suchergebnisse</MudText>
