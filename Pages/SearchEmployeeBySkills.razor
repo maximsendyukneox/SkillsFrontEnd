@@ -62,6 +62,12 @@
                     <MudTd DataLabel="Kenntnis">@context.Skill.Name</MudTd>
                     <MudTd DataLabel="Stufe">@context.Level</MudTd>
                 </RowTemplate>
+                <NoRecordsContent>
+                    @if (isNoRecordsContentDisplayed)
+                    {
+                    <MudText>Es konnten keine passenden Mitarbeiter gefunden werden</MudText>
+                    }
+                </NoRecordsContent>
                 <PagerContent>
                     <MudTablePager />
                 </PagerContent>
@@ -83,6 +89,8 @@
     private List<Employee> Employees = new List<Employee>();
     private bool loading = false;
     private List<string> proficiencies = new();
+    private bool isNoRecordsContentDisplayed = false;
+
 
     protected override async Task OnInitializedAsync()
     {
@@ -156,11 +164,14 @@
 
     private async Task SearchEmployees()
     {
+        isNoRecordsContentDisplayed = true;
+        loading = true;
         var filteredEmployees = await Program.client.ProficiencyBasedSearchEngine(proficienciesDTO);
         searchResult.RemoveAll(p => true);
         foreach (var employee in filteredEmployees)
         {
             searchResult.AddRange(await Program.client.GetProficiencyAsync(employee.Id));
         }
+        loading = false;
     }
 }

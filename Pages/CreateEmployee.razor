@@ -138,6 +138,7 @@
 
     private async Task SaveEmployee(EditContext context)
     {
+        isError = false;
         StateHasChanged();
         SkillsDbContext dbContext = Program.dbContextFactory.CreateDbContext();
         Employee employee = null;
