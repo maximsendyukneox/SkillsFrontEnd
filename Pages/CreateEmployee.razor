@@ -140,13 +140,12 @@
     {
         isError = false;
         StateHasChanged();
-        SkillsDbContext dbContext = Program.dbContextFactory.CreateDbContext();
         Employee employee = null;
         try
         {
-            employee = dbContext.CreateEmployee(model.FirstName, model.LastName, model.Date!.Value, false);
+            employee = await Program.client.CreateEmployeeAsync(new EmployeeDTO_keyless(model.FirstName, model.LastName, model.Date!.Value.ToShortDateString(),true));
         }
-        catch(ArgumentException ex)
+        catch(Exception ex)
         {
             isException = true;
             ErrorText = ex.Message;
@@ -154,9 +153,8 @@
         }
         foreach (var proficiencyDTO in proficienciesDTO)
         {
-            dbContext.CreateProficiency(proficiencyDTO.SkillName, proficiencyDTO.SkillLevel, employee, false);
+            await Program.client.CreateProficiencyAsync(new SkillsBackend.ProficiencyBaseDTO_withOwner(proficiencyDTO.SkillName, proficiencyDTO.SkillLevel, employee.Id));
         }
-        await dbContext.SaveChangesAsync();
         isSuccess = true;
         model = new SaveEmployeeForm();
         proficienciesDTO.Clear();
