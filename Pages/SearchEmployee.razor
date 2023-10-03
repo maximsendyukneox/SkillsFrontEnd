@@ -7,24 +7,24 @@
 
 <MudTable Items="@Employees" Class="ma-2" Elevation="3" Loading="@loading" LoadingProgressColor="Color.Info" Striped="true" Filter="new Func<Employee,bool>(FilterFunc1)" @bind-SelectedItem="selectedEmployee">
         <ToolBarContent>
-            <MudText Typo="Typo.h6">Mitarbeitersuche</MudText>
+        <MudText uid="table_title" Typo="Typo.h6">Mitarbeitersuche</MudText>
             <MudSpacer />
-            <MudTextField @bind-Value="searchString1" Immediate="true" Placeholder="Suchen" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+            <MudTextField uid="table_searchField" @bind-Value="searchString1" Immediate="true" Placeholder="Suchen" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
         </ToolBarContent>
         <HeaderContent>
-            <MudTh>Vorname</MudTh>
-            <MudTh>Nachname</MudTh>
-            <MudTh>Geburtsdatum</MudTh>
-            <MudTh>Aktion</MudTh>
+            <MudTh uid="table_column_firstName">Vorname</MudTh>
+            <MudTh uid="table_column_lastName">Nachname</MudTh>
+            <MudTh uid="table_column_birthday">Geburtsdatum</MudTh>
+            <MudTh uid="table_column_action">Aktion</MudTh>
         </HeaderContent>
         <RowTemplate>
-            <MudTd DataLabel="Vorname">@context.FirstName</MudTd>
-            <MudTd DataLabel="Nachname">@context.LastName</MudTd>
-            <MudTd DataLabel="Geburtsdatum">@context.Birthday.ToShortDateString()</MudTd>
-            <MudTd DataLabel="Stufe"><MudIconButton Icon="@Icons.Material.Filled.Edit" aria-label="edit employee" @onclick="@(()=>EditEmployee(context))"></MudIconButton></MudTd>
+            <MudTd uid=@($"table_firstName_{context.FirstName}") DataLabel="Vorname">@context.FirstName</MudTd>
+            <MudTd uid=@($"table_lastName_{context.LastName}") DataLabel="Nachname">@context.LastName</MudTd>
+            <MudTd uid=@($"table_birthday_{context.FirstName}") DataLabel="Geburtsdatum">@context.Birthday.ToShortDateString()</MudTd>
+            <MudTd uid="btn_editEmployee" DataLabel="Stufe"><MudIconButton Icon="@Icons.Material.Filled.Edit" aria-label="edit employee" @onclick="@(()=>EditEmployee(context))"></MudIconButton></MudTd>
         </RowTemplate>
         <PagerContent>
-            <MudTablePager />
+            <MudTablePager uid ="table_pager"/>
         </PagerContent>
     </MudTable>
 

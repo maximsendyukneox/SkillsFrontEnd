@@ -8,12 +8,12 @@
 
 <MudLayout>
     <MudAppBar Elevation="1" Style="background:rgb(30,30,30);">
-        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
-        <MudNavLink Href="/" Match="NavLinkMatch.All" Style="width:fit-content;height:inherit;margin-left:0;padding: 10px 10px 10px 0px; ">
+        <MudIconButton uid="app_btnMenu" Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
+        <MudNavLink uid="app_logo" Href="/" Match="NavLinkMatch.All" Style="width:fit-content;height:inherit;margin-left:0;padding: 10px 10px 10px 0px; ">
            <MudImage Src="./Images/logo/neoxLogoWhite.svg" Alt="neox Logo" Style="width:10rem;"></MudImage>
         </MudNavLink>    
     </MudAppBar>
-    <MudDrawer @bind-Open="_drawerOpen" ClipMode="DrawerClipMode.Always" Elevation="2" Style="color:black;background-color:white;">
+    <MudDrawer uid="app_drawer" @bind-Open="_drawerOpen" ClipMode="DrawerClipMode.Always" Elevation="2" Style="color:black;background-color:white;">
         <MyNavMenu>
         </MyNavMenu>
     </MudDrawer>

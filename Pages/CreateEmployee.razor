@@ -8,20 +8,20 @@
 <EditForm Model="@model" OnValidSubmit="SaveEmployee">
     <DataAnnotationsValidator />
 <MudPaper Class="pa-8 ma-2" Elevation="3">
-    <MudText Typo="Typo.h6">Mitarbeiter erfassen</MudText>
+    <MudText uid="page_title" Typo="Typo.h6">Mitarbeiter erfassen</MudText>
     <MudDivider Style="margin-bottom: 2rem;"/>
     <MudStack>
-        <MudTextField Style="width:20rem;" OnKeyUp="OnInputChanged" @bind-value="model.FirstName" For="@(()=> model.FirstName)" Label="Vorname" Variant="Variant.Outlined"></MudTextField>
-        <MudTextField Style="width:20rem;" OnKeyUp="OnInputChanged" @bind-Value="model.LastName" For="@(()=> model.LastName)" Label="Nachname" Variant="Variant.Outlined"></MudTextField>
-        <MudDatePicker Placeholder="DD.MM.YYYY" DateFormat="dd.MM.yyyy" Color="Color.Info" PickerOpened="OnDatePickerOpened" For="@(()=> model.Date)" Style="width:20rem;" ErrorText="Kein valides Datumsformat" Label="Geburtsdatum" @bind-Date="model.Date" MaxDate="DateTime.Now" Variant="Variant.Outlined" Editable="true" />
+        <MudTextField uid="input_firstName" Style="width:20rem;" OnKeyUp="OnInputChanged" @bind-value="model.FirstName" For="@(()=> model.FirstName)" Label="Vorname" Variant="Variant.Outlined"></MudTextField>
+        <MudTextField uid="input_lastName" Style="width:20rem;" OnKeyUp="OnInputChanged" @bind-Value="model.LastName" For="@(()=> model.LastName)" Label="Nachname" Variant="Variant.Outlined"></MudTextField>
+        <MudDatePicker uid="input_birthday" Placeholder="DD.MM.YYYY" DateFormat="dd.MM.yyyy" Color="Color.Info" PickerOpened="OnDatePickerOpened" For="@(()=> model.Date)" Style="width:20rem;" ErrorText="Kein valides Datumsformat" Label="Geburtsdatum" @bind-Date="model.Date" MaxDate="DateTime.Now" Variant="Variant.Outlined" Editable="true" />
       
     <MudGrid>
        <MudItem>
-              <MudAutocomplete T="string" Label="Kenntnis" Text="@newProficiency" Value="@newProficiency" ValueChanged="OnProficiencyChanged" SearchFunc="@SearchProficiency"
+                  <MudAutocomplete uid="input_skillName" T="string" Label="Kenntnis" Text="@newProficiency" Value="@newProficiency" ValueChanged="OnProficiencyChanged" SearchFunc="@SearchProficiency"
                              MaxItems="null" Style="width:20rem;" Variant="Variant.Outlined" Error="@isError" ErrorText="@error" CoerceText="true" CoerceValue="true" />
        </MudItem>
        <MudItem >
-            <MudSelect Label="Stufe" Variant="Variant.Outlined" @bind-Value="proficiencyLevel" Style="width:20rem;">
+            <MudSelect uid="input_skillLevel" Label="Stufe" Variant="Variant.Outlined" @bind-Value="proficiencyLevel" Style="width:20rem;">
                 @foreach(ProficiencyLevel profLevel in Enum.GetValues(typeof(ProficiencyLevel)))
                 {
                   <MudSelectItem Value="@profLevel">@profLevel</MudSelectItem>
@@ -29,23 +29,23 @@
             </MudSelect>
        </MudItem>
             <MudItem Style="padding:1.5rem 0 0 0;">
-                <MudFab Color="Color.Info" StartIcon="@Icons.Material.Filled.Add" Size="Size.Small" @onclick="AddNewProficiency" />
+                <MudFab uid="btn_addSkill" Color="Color.Info" StartIcon="@Icons.Material.Filled.Add" Size="Size.Small" @onclick="AddNewProficiency" />
             </MudItem>    
     </MudGrid>
 
     <MudTable Items="@proficienciesDTO" Elevation="0" Style="padding:0; margin-top:1rem; width:45rem;">
         <HeaderContent>
-                    <MudTh Style="padding:10px 10px 10px 0;">Kenntnis</MudTh>
-                    <MudTh Style="padding:10px 10px 10px 0;">Stufe</MudTh>
-                    <MudTh Style="padding:10px 10px 10px 0;"></MudTh>
+                    <MudTh uid="table_column_skillName" Style="padding:10px 10px 10px 0;">Kenntnis</MudTh>
+                    <MudTh uid="table_column_skillLevel" Style="padding:10px 10px 10px 0;">Stufe</MudTh>
+                    <MudTh uid="table_column_action" Style="padding:10px 10px 10px 0;"></MudTh>
         </HeaderContent>
-        <RowTemplate Context="ctx" >
-                    <MudTd Style="padding:10px 10px 10px 0;" DataLabel="Kenntnis">@ctx.SkillName</MudTd>
-                    <MudTd Style="padding:10px 10px 10px 0;" DataLabel="Stufe">@ctx.SkillLevel</MudTd>
-                    <MudTd Style="padding:10px 10px 10px 0;" DataLabel="Stufe"><MudIconButton Icon="@Icons.Material.Filled.Clear" aria-label="delete" @onclick="@(()=>RemoveProficiency(ctx))" Color="Color.Error"></MudIconButton></MudTd>
-        </RowTemplate>
+        <RowTemplate Context="ctx">
+                    <MudTd uid=@($"table_skillName_{ctx.SkillName}") Style="padding:10px 10px 10px 0;" DataLabel="Kenntnis">@ctx.SkillName</MudTd>
+                    <MudTd uid=@($"table_skillLevel_{ctx.SkillLevel}") Style="padding:10px 10px 10px 0;" DataLabel="Stufe">@ctx.SkillLevel</MudTd>
+                    <MudTd uid=@($"table_btnDelete_{ctx.SkillName}") Style="padding:10px 10px 10px 0;" DataLabel=""><MudIconButton Icon="@Icons.Material.Filled.Clear" aria-label="delete" @onclick="@(()=>RemoveProficiency(ctx))" Color="Color.Error"></MudIconButton></MudTd>
+                </RowTemplate>
     </MudTable>  
-    <MudButton Style="width:8rem; margin-top: 4rem;border-radius: 1.1rem;" ButtonType="ButtonType.Submit" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Save" Color="Color.Info" Size="Size.Medium">Speichern</MudButton>
+    <MudButton uid="btn_save" Style="width:8rem; margin-top: 4rem;border-radius: 1.1rem;" ButtonType="ButtonType.Submit" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Save" Color="Color.Info" Size="Size.Medium">Speichern</MudButton>
         @if (isException)
         {
           <MudAlert ShowCloseIcon="true"  Severity="Severity.Error">@ErrorText</MudAlert>
@@ -159,6 +159,6 @@
         model = new SaveEmployeeForm();
         proficienciesDTO.Clear();
     }
-    
+
 }
  
