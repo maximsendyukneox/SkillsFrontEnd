@@ -5,13 +5,13 @@
 @using System.ComponentModel.DataAnnotations
 @using System.Linq
 
-<EditForm Model="@model" OnValidSubmit="SaveEmployee">
+<EditForm EditContext="@editContext">
     <DataAnnotationsValidator />
 <MudPaper Class="pa-8 ma-2" Elevation="3">
     <MudText uid="page_title" Typo="Typo.h6">Mitarbeiter erfassen</MudText>
     <MudDivider Style="margin-bottom: 2rem;"/>
     <MudStack>
-        <MudTextField uid="input_firstName" Style="width:20rem;" OnKeyUp="OnInputChanged" @bind-value="model.FirstName" For="@(()=> model.FirstName)" Label="Vorname" Variant="Variant.Outlined"></MudTextField>
+        <MudTextField uid="input_firstName" Style="width:20rem;" OnKeyUp="OnInputChanged" @bind-Value="model.FirstName" For="@(()=> model.FirstName)" Label="Vorname" Variant="Variant.Outlined"></MudTextField>
         <MudTextField uid="input_lastName" Style="width:20rem;" OnKeyUp="OnInputChanged" @bind-Value="model.LastName" For="@(()=> model.LastName)" Label="Nachname" Variant="Variant.Outlined"></MudTextField>
         <MudDatePicker uid="input_birthday" Placeholder="DD.MM.YYYY" DateFormat="dd.MM.yyyy" Color="Color.Info" PickerOpened="OnDatePickerOpened" For="@(()=> model.Date)" Style="width:20rem;" ErrorText="Kein valides Datumsformat" Label="Geburtsdatum" @bind-Date="model.Date" MaxDate="DateTime.Now" Variant="Variant.Outlined" Editable="true" />
       
@@ -44,8 +44,8 @@
                     <MudTd uid=@($"table_skillLevel_{ctx.SkillLevel}") Style="padding:10px 10px 10px 0;" DataLabel="Stufe">@ctx.SkillLevel</MudTd>
                     <MudTd uid=@($"table_btnDelete_{ctx.SkillName}") Style="padding:10px 10px 10px 0;" DataLabel=""><MudIconButton Icon="@Icons.Material.Filled.Clear" aria-label="delete" @onclick="@(()=>RemoveProficiency(ctx))" Color="Color.Error"></MudIconButton></MudTd>
                 </RowTemplate>
-    </MudTable>  
-    <MudButton uid="btn_save" Style="width:8rem; margin-top: 4rem;border-radius: 1.1rem;" ButtonType="ButtonType.Submit" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Save" Color="Color.Info" Size="Size.Medium">Speichern</MudButton>
+    </MudTable>
+            <MudButton uid="btn_save" Style="width:8rem; margin-top: 4rem;border-radius: 1.1rem;" @onclick="SubmitHandler" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Save" Color="Color.Info" Size="Size.Medium">Speichern</MudButton>
         @if (isException)
         {
           <MudAlert ShowCloseIcon="true"  Severity="Severity.Error">@ErrorText</MudAlert>
@@ -71,10 +71,12 @@
     SaveEmployeeForm model = new SaveEmployeeForm();
     List<Proficiency> tableData = new();
     List<string> proficiencies = new();
+    private EditContext editContext { get; set; }
 
 
     protected override async Task OnInitializedAsync()
     {
+        editContext = new EditContext(model);
         await base.OnInitializedAsync();
         try
         {
@@ -84,6 +86,15 @@
         {
             Console.WriteLine(ex);
         }
+    }
+
+    private async void SubmitHandler()
+    {
+        isSuccess = false;
+        if (editContext.Validate())
+        {
+            await SaveEmployee();
+        }          
     }
 
     private async Task<IEnumerable<string>> SearchProficiency(string value)
@@ -136,10 +147,9 @@
         isSuccess = false;
     }
 
-    private async Task SaveEmployee(EditContext context)
+    private async Task SaveEmployee()
     {
         isError = false;
-        StateHasChanged();
         Employee employee = null;
         try
         {
@@ -157,7 +167,10 @@
         }
         isSuccess = true;
         model = new SaveEmployeeForm();
+        editContext = new EditContext(model);
+        proficiencyLevel = ProficiencyLevel.Basic;
         proficienciesDTO.Clear();
+        StateHasChanged();
     }
 
 }
