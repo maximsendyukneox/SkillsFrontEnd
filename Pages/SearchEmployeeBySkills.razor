@@ -33,7 +33,14 @@
                 </HeaderContent>
                 <RowTemplate Context="ctx">
                     <MudTd uid=@($"table_skillName_{ctx.SkillName}") Style="padding:10px 10px 10px 0;" DataLabel="Kenntnis">@ctx.SkillName</MudTd>
-                    <MudTd uid=@($"table_lastName_{ctx.SkillLevel}") Style="padding:10px 10px 10px 0;" DataLabel="Stufe">@ctx.SkillLevel</MudTd>
+                    <MudTd uid=@($"table_lastName_{ctx.SkillLevel}") Style="padding:10px 10px 10px 0;" DataLabel="Stufe">
+                        <MudSelect Style="width:20rem;" T="ProficiencyLevel" Value="ctx.SkillLevel" Variant="Variant.Outlined" ValueChanged="@((selection)=>ChangeProficiency(ctx,selection))">
+                            @foreach (ProficiencyLevel profLevel in Enum.GetValues(typeof(ProficiencyLevel)))
+                            {
+                                <MudSelectItem Value="@profLevel">@profLevel</MudSelectItem>
+                            }
+                        </MudSelect>
+                    </MudTd>
                     <MudTd uid=@($"table_btnDelete_{ctx.SkillName}") Style="padding:10px 10px 10px 0;" DataLabel=""><MudIconButton Icon="@Icons.Material.Filled.Clear" aria-label="delete" @onclick="@(()=>RemoveProficiency(ctx))" Color="Color.Error"></MudIconButton></MudTd>
                 </RowTemplate>
             </MudTable>
@@ -41,12 +48,18 @@
         <MudItem xs="12" Style="margin-top:2rem;">
             <MudButton uid="btn_searchEmployees" Style="width:8rem; margin-top: 1rem;border-radius: 1.1rem;" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Search" @onclick="SearchEmployees" Color="Color.Info" Size="Size.Medium">Suchen</MudButton>
         </MudItem>
+        <MudItem xs="12">
+                    @if (!hasSearchFoundEmployees)
+                    {                       
+                            <MudAlert Severity="Severity.Warning">Keine Suchtreffer für die gewählten Mindestanforderungen, nächstbeste Mitarbeiter werden angezeigt  </MudAlert>                        
+                    }                
+        </MudItem>
         <MudItem xs="12" Style="padding:0;margin-top:2rem;">
             <MudTable Items="@searchResult" Elevation="0" Class="ma-2" Loading="@loading" LoadingProgressColor="Color.Info" Striped="true" Filter="new Func<Proficiency,bool>(FilterFunc1)">
                 <ToolBarContent>
-                    <MudText uid="table_title" Typo="Typo.h6">Suchergebnisse</MudText>
-                    <MudSpacer />
-                    <MudTextField uid="table_searchField" @bind-Value="searchString" Immediate="true" Placeholder="Suchen" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+                <MudText uid="table_title" Typo="Typo.h6">Suchergebnisse</MudText>
+               <MudSpacer />
+               <MudTextField uid="table_searchField" @bind-Value="searchString" Immediate="true" Placeholder="Suchen" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
                 </ToolBarContent>
                 <HeaderContent>
                     <MudTh uid="table_column_firstName">Vorname</MudTh>
@@ -90,6 +103,7 @@
     private bool loading = false;
     private List<string> proficiencies = new();
     private bool isNoRecordsContentDisplayed = false;
+    private bool hasSearchFoundEmployees = true;
 
 
     protected override async Task OnInitializedAsync()
@@ -138,6 +152,13 @@
         proficienciesDTO.RemoveAll(dto => dto.SkillName == rowData.SkillName && dto.SkillLevel == rowData.SkillLevel);
     }
 
+    private void ChangeProficiency(ProficiencyBaseDTO rowData, ProficiencyLevel selectedLevel)
+    {
+        //proficiencyLevel = selectedLevel;
+        proficienciesDTO.Single(dto => dto.SkillName == rowData.SkillName).SkillLevel = selectedLevel;
+
+    }
+
     private async Task<IEnumerable<string>> SearchProficiency(string value)
     {
         // In real life use an asynchronous function for fetching data from an api.
@@ -164,10 +185,16 @@
 
     private async Task SearchEmployees()
     {
+        hasSearchFoundEmployees = true;
         isNoRecordsContentDisplayed = true;
         loading = true;
-        var filteredEmployees = await Program.client.ProficiencyBasedSearchEngine(proficienciesDTO);
         searchResult.RemoveAll(p => true);
+        var filteredEmployees = await Program.client.ProficiencyBasedSearchEngine(proficienciesDTO);
+        if (filteredEmployees.Count() == 0)
+        {
+            hasSearchFoundEmployees = false;
+            filteredEmployees = await Program.client.ProficiencyBasedSearchFallback2(proficienciesDTO);
+        }
         foreach (var employee in filteredEmployees)
         {
             searchResult.AddRange(await Program.client.GetProficiencyAsync(employee.Id));
