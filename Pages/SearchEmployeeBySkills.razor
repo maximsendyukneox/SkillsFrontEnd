@@ -192,10 +192,11 @@
             return true;
         return false;
     }
-    
+
     private void PrepareTableData (List<Proficiency> searchResult)
     {
         // unstrukturierte ergebnisdaten aus der suche strukturieren zum anzeigen in tabelle
+        tableData.RemoveAll(data=>true);
         foreach (var employeeProficiency in searchResult)
         {
             // nachschauen ob mitarbeiter bereits in der liste zum anzeigen in der tabelle

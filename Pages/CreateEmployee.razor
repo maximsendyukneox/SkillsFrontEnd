@@ -4,6 +4,7 @@
 @using System.Threading;
 @using System.ComponentModel.DataAnnotations
 @using System.Linq
+@using System.Text.RegularExpressions;
 
 <EditForm EditContext="@editContext">
     <DataAnnotationsValidator />
@@ -59,7 +60,7 @@
 
 
 @code {
-    List<ProficiencyBaseDTO> proficienciesDTO = new();
+        List<ProficiencyBaseDTO> proficienciesDTO = new();
     private string newProficiency = String.Empty;
     private ProficiencyLevel proficiencyLevel = ProficiencyLevel.Basic;
     private bool isError = false;
@@ -126,6 +127,13 @@
             return;
         };
 
+        if (!Regex.IsMatch(newProficiency, @"^[^,'><=""\]]*$"))
+        {
+            error = "\" ' , < > = nicht erlaubt";
+            isError = true;
+            return;
+        }
+
         proficienciesDTO.Add(new(newProficiency, proficiencyLevel));
         newProficiency = string.Empty;
         isError = false;
@@ -152,7 +160,7 @@
         Employee employee = null;
         try
         {
-            employee = await Program.client.CreateEmployeeAsync(new EmployeeDTO_keyless(model.FirstName, model.LastName, model.Date!.Value.ToShortDateString(),true));
+            employee = await Program.client.CreateEmployeeAsync(new EmployeeDTO_keyless(model.FirstName.Trim(), model.LastName.Trim(), model.Date!.Value.ToShortDateString(),true));
         }
         catch(Exception ex)
         {
