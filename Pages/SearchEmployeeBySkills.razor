@@ -232,12 +232,31 @@
         isNoRecordsContentDisplayed = true;
         loading = true;
         searchResult.RemoveAll(p => true);
-        var filteredEmployees = await Program.client.ProficiencyBasedSearchEngine(proficienciesDTO);
-        if (filteredEmployees.Count() == 0)
+        bool exit = false;
+        var filteredEmployees = new List<Employee?>();
+        do
         {
-            hasSearchFoundEmployees = false;
-            filteredEmployees = await Program.client.ProficiencyBasedSearchFallback2(proficienciesDTO);
+            filteredEmployees = await Program.client.ProficiencyBasedSearchEngine(proficienciesDTO);
+            if (filteredEmployees.Count() == 0)
+            {
+                hasSearchFoundEmployees = false;
+                filteredEmployees = await Program.client.ProficiencyBasedSearchFallback2(proficienciesDTO);
+            }
+            if (filteredEmployees.Count() == 0)
+            {
+                hasSearchFoundEmployees = false;
+                foreach (var skill in proficienciesDTO)
+                {
+                    skill.SkillLevel -= 1;
+                }
+            }
+            else
+            {
+                exit = true;
+            }
         }
+        while (!exit);
+
         foreach (var employee in filteredEmployees)
         {
             searchResult.AddRange(await Program.client.GetProficiencyAsync(employee.Id));
