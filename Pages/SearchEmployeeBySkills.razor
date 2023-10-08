@@ -55,7 +55,7 @@
                     }                
         </MudItem>
         <MudItem xs="12" Style="padding:0;margin-top:2rem;">
-            <MudTable Items="@searchResult" Elevation="0" Class="ma-2" Loading="@loading" LoadingProgressColor="Color.Info" Striped="true" Filter="new Func<Proficiency,bool>(FilterFunc1)">
+            <MudTable Items="@tableData" Breakpoint="Breakpoint.None" Elevation="0" Class="ma-2" Loading="@loading" LoadingProgressColor="Color.Info" Striped="true" Filter="new Func<EmployeeTableData,bool>(FilterFunc1)">
                 <ToolBarContent>
                 <MudText uid="table_title" Typo="Typo.h6">Suchergebnisse</MudText>
                <MudSpacer />
@@ -69,11 +69,21 @@
                     <MudTh uid="table_column_skillLevel">Stufe</MudTh>
                 </HeaderContent>
                 <RowTemplate>
-                    <MudTd uid=@($"table_firstName_{@context.Owner.FirstName}") DataLabel="Vorname">@context.Owner.FirstName</MudTd>
-                    <MudTd uid=@($"table_lastName_{@context.Owner.LastName}") DataLabel="Nachname">@context.Owner.LastName</MudTd>
-                    <MudTd uid=@($"table_birthday_{@context.Owner.FirstName}") DataLabel="Geburtsdatum">@context.Owner.Birthday.ToShortDateString()</MudTd>
-                    <MudTd uid=@($"table_skillName_{@context.Skill.Name}") DataLabel="Kenntnis">@context.Skill.Name</MudTd>
-                    <MudTd uid=@($"table_skillLevel_{@context.Level}") DataLabel="Stufe">@context.Level</MudTd>
+                    <MudTd Style="vertical-align:top" uid=@($"table_firstName_{@context.FirstName}") DataLabel="Vorname">@context.FirstName</MudTd>
+                    <MudTd Style="vertical-align:top" uid=@($"table_lastName_{@context.LastName}") DataLabel="Nachname">@context.LastName</MudTd>
+                    <MudTd Style="vertical-align:top" uid=@($"table_birthday_{@context.FirstName}") DataLabel="Geburtsdatum">@context.Birthday.ToShortDateString()</MudTd>
+                    <MudTd DataLabel="Kenntnis">
+                        @foreach(var skill in context.Skills)
+                        {
+                            <MudText Style="font-size: inherit;">@skill</MudText>
+                        }
+                    </MudTd>
+                    <MudTd  DataLabel="Stufe">
+                        @foreach (var skillLevel in context.SkillLevels)
+                        {
+                            <MudText Style="font-size: inherit;">@skillLevel</MudText>
+                        }
+                    </MudTd>
                 </RowTemplate>
                 <NoRecordsContent>
                     @if (isNoRecordsContentDisplayed)
@@ -104,7 +114,7 @@
     private List<string> proficiencies = new();
     private bool isNoRecordsContentDisplayed = false;
     private bool hasSearchFoundEmployees = true;
-
+    List<EmployeeTableData> tableData = new List<EmployeeTableData>();
 
     protected override async Task OnInitializedAsync()
     {
@@ -170,17 +180,49 @@
         return proficiencies.Where(x => x.Contains(value, StringComparison.InvariantCultureIgnoreCase));
     }
 
-    private bool FilterFunc1(Proficiency proficiency) => FilterFunc(proficiency, searchString);
+    private bool FilterFunc1(EmployeeTableData entry) => FilterFunc(entry, searchString);
 
-    private bool FilterFunc(Proficiency proficiency, string searchString)
+    private bool FilterFunc(EmployeeTableData entry, string searchString)
     {
         if (string.IsNullOrWhiteSpace(searchString))
             return true;
-        if (proficiency.Owner.FirstName.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+        if (entry.FirstName.Contains(searchString, StringComparison.OrdinalIgnoreCase))
             return true;
-        if (proficiency.Owner.LastName.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+        if (entry.LastName.Contains(searchString, StringComparison.OrdinalIgnoreCase))
             return true;
         return false;
+    }
+    
+    private void PrepareTableData (List<Proficiency> searchResult)
+    {
+        // unstrukturierte ergebnisdaten aus der suche strukturieren zum anzeigen in tabelle
+        foreach (var employeeProficiency in searchResult)
+        {
+            // nachschauen ob mitarbeiter bereits in der liste zum anzeigen in der tabelle
+            EmployeeTableData empl = tableData.Find(employee =>
+                employee.FirstName == employeeProficiency.Owner.FirstName &&
+                employee.LastName == employeeProficiency.Owner.LastName &&
+                employee.Birthday == employeeProficiency.Owner.Birthday
+            );
+
+            if (empl == null)
+            {
+                //mitarbeiter noch nicht in der liste, füge neuen eintrag für ihn hinzu
+                EmployeeTableData employeeWithSkills = new EmployeeTableData();
+                employeeWithSkills.FirstName = employeeProficiency.Owner.FirstName;
+                employeeWithSkills.LastName = employeeProficiency.Owner.LastName;
+                employeeWithSkills.Birthday = employeeProficiency.Owner.Birthday;
+                employeeWithSkills.Skills.Add(employeeProficiency.Skill.Name);
+                employeeWithSkills.SkillLevels.Add(employeeProficiency.Level);
+                tableData.Add(employeeWithSkills);
+            }
+            else
+            {
+                // mitarbeiter bereits in der liste, füge kenntnis und skillevel hinzu
+                empl.Skills.Add(employeeProficiency.Skill.Name);
+                empl.SkillLevels.Add(employeeProficiency.Level);
+            }
+        }
     }
 
     private async Task SearchEmployees()
@@ -199,6 +241,8 @@
         {
             searchResult.AddRange(await Program.client.GetProficiencyAsync(employee.Id));
         }
+
+        PrepareTableData(searchResult);
         loading = false;
     }
 }
