@@ -33,7 +33,6 @@
     private Employee selectedEmployee = null;
     private List<Employee> Employees = new List<Employee>();
     private bool loading = true;
-    SkillsDbContext context = Program.dbContextFactory.CreateDbContext();
 
     protected override async Task OnInitializedAsync()
     {

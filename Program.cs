@@ -14,29 +14,14 @@ namespace SkillsFrontEnd;
 public class Program
 {
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor.
-    public static SkillsDbContextFactory dbContextFactory { get; private set; } //TODO: Refactor static variable into WebApplication service
     public static SkillsClient client { get; private set; }
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor.
-   
-
-    private static void debug()
-    {
-        var context = dbContextFactory.CreateDbContext();
-        var deleted = context.InvisibleEmployees.Where(e => e.LastName == "Mustermann14");
-        if (deleted.Any())
-            context.UnhideEmployee(deleted.First(), true);
-        else
-        {
-            Console.WriteLine("No deleted employee Mustermann14 in database found");
-        }
-        context.Dispose();
-    }
 
     public static void Main(string[] args)
     {
         client = new SkillsClient(Constants.API_BASE_URI, "Integration_Test");
         var builder = WebApplication.CreateBuilder(args);
-        dbContextFactory = new SkillsDbContextFactory();
+      
 
         // Add services to the container.
         builder.Services.AddMudServices();
@@ -63,9 +48,6 @@ public class Program
         app.MapFallbackToPage("/_Host");
 
         app.Run();
-
-        var x = Console.ReadKey();
-        Console.WriteLine(x.Key.ToString());
     }
 }
 
