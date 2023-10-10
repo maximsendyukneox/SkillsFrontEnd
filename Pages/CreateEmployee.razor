@@ -4,7 +4,6 @@
 @using System.Threading;
 @using System.ComponentModel.DataAnnotations
 @using System.Linq
-@using System.Text.RegularExpressions;
 
 <EditForm EditContext="@editContext">
     <DataAnnotationsValidator />
@@ -21,7 +20,7 @@
                                      MaxItems="null" Style="width:20rem;" Variant="Variant.Outlined" Error="@isError" ErrorText="@error" CoerceText="true" CoerceValue="true" />
        </MudItem>
        <MudItem >
-             <MudSelect uid="input_skillLevel" Label="Stufe" Variant="Variant.Outlined" @bind-Value="proficiencyLevel" Style="width:20rem;">
+             <MudSelect uid="input_skillLevel" Label="Stufe" Variant="Variant.Outlined" @bind-Value="proficiencyLevel" Style="width:20rem;" >
                 @foreach(ProficiencyLevel profLevel in Enum.GetValues(typeof(ProficiencyLevel)))
                 {
                   <MudSelectItem Value="@profLevel">@profLevel</MudSelectItem>
@@ -48,7 +47,7 @@
             <MudButton uid="btn_save" Style="width:8rem; margin-top: 4rem;border-radius: 1.1rem;" @onclick="SubmitHandler" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Save" Color="Color.Info" Size="Size.Medium">Speichern</MudButton>
         @if (isException)
         {
-          <MudAlert ShowCloseIcon="true"  Severity="Severity.Error">@ErrorText</MudAlert>
+          <MudAlert  Severity="Severity.Error">@ErrorText</MudAlert>
         }
         @if (isSuccess)
         {
@@ -94,7 +93,8 @@
         if (editContext.Validate())
         {
             await SaveEmployee();
-        }          
+        }
+        StateHasChanged();
     }
 
     private async Task<IEnumerable<string>> SearchProficiency(string value)
@@ -126,13 +126,6 @@
             return;
         };
 
-        if (!Regex.IsMatch(newProficiency, @"^[^,'><=""\]]*$"))
-        {
-            error = "\" ' , < > = nicht erlaubt";
-            isError = true;
-            return;
-        }
-
         proficienciesDTO.Add(new(newProficiency, proficiencyLevel));
         newProficiency = string.Empty;
         isError = false;
@@ -156,6 +149,7 @@
     private async Task SaveEmployee()
     {
         isError = false;
+        isException = false;
         Employee employee = null;
         try
         {
@@ -176,7 +170,7 @@
         editContext = new EditContext(model);
         proficiencyLevel = ProficiencyLevel.Basic;
         proficienciesDTO.Clear();
-        StateHasChanged();
+        //StateHasChanged();
     }
 
 }
