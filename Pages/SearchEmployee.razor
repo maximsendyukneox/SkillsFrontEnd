@@ -18,9 +18,9 @@
             <MudTh uid="table_column_action">Aktion</MudTh>
         </HeaderContent>
         <RowTemplate>
-            <MudTd uid=@($"table_firstName_{context.FirstName}") DataLabel="Vorname">@context.FirstName</MudTd>
-            <MudTd uid=@($"table_lastName_{context.LastName}") DataLabel="Nachname">@context.LastName</MudTd>
-            <MudTd uid=@($"table_birthday_{context.FirstName}") DataLabel="Geburtsdatum">@context.Birthday.ToShortDateString()</MudTd>
+        <MudTd uid=@($"table_firstNameOf_employeeId_{context.Id}") DataLabel="Vorname">@context.FirstName</MudTd>
+        <MudTd uid=@($"table_lastNameOf_employeeId_{context.Id}") DataLabel="Nachname">@context.LastName</MudTd>
+            <MudTd uid=@($"table_birthdayOf_employeeId_{context.Id}") DataLabel="Geburtsdatum">@context.Birthday.ToShortDateString()</MudTd>
             <MudTd uid="btn_editEmployee" DataLabel="Stufe"><MudIconButton Icon="@Icons.Material.Filled.Edit" aria-label="edit employee" @onclick="@(()=>EditEmployee(context))"></MudIconButton></MudTd>
         </RowTemplate>
         <PagerContent>
