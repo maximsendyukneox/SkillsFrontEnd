@@ -1,8 +1,35 @@
 ﻿@inherits LayoutComponentBase
 
-<MudNavMenu Color="Color.Info" Style="font-size:1rem;">
-    <MudNavLink uid="pagelink_createEmployees" Icon="@Icons.Material.Filled.PersonAdd" Href="/create-employee" IconColor="Color.Inherit" Style="margin-top: 1rem;" Match="NavLinkMatch.Prefix">Mitarbeitererfassung</MudNavLink>
-    <MudNavLink uid="pagelink_searchEmployees" Icon="@Icons.Material.Filled.PersonSearch" Href="/search-employee" IconColor="Color.Inherit" Match="NavLinkMatch.Prefix">Mitarbeitersuche</MudNavLink>
-    <MudNavLink uid="pagelink_searchBySkill" Icon="@Icons.Material.Filled.ManageSearch" Href="/search-byskill" IconColor="Color.Inherit" Match="NavLinkMatch.Prefix">Kenntnisbasierte Mitarbeitersuche</MudNavLink>
-</MudNavMenu>
 
+<MudNavMenu Color="Color.Info" Style="font-size:1rem;}" Class="d-flex flex-column justify-center align-center">
+    <MudNavLink uid="app_logo" Href="/" Match="NavLinkMatch.All" Style="width:fit-content;margin-left:0;padding: 20px 20px 0 0; margin-top:1rem;margin-bottom:2rem; }">
+    <MudImage Src="./Images/logo/neoxLogoWhite.svg" Alt="neox Logo" Style="width:100%;"></MudImage>
+    </MudNavLink>
+    <MudNavLink Style="padding: 0 .8rem 0 .8rem;" uid="pagelink_searchEmployees" Icon="@Icons.Material.Filled.Groups" Href="/search-employees" IconColor="Color.Inherit" Match="NavLinkMatch.Prefix">Mitarbeiter</MudNavLink>
+    <MudNavLink Style="padding: 0 .8rem 0 .8rem;" uid="pagelink_searchBySkill" Icon="@Icons.Material.Filled.ManageSearch" Href="/search-byskill" IconColor="Color.Inherit" Match="NavLinkMatch.Prefix">Suche</MudNavLink>
+    <MudNavLink Style="padding: 0 .8rem 0 .8rem;" uid="pagelink_archive" Icon="@Icons.Material.Filled.GroupOff" Href="/archive" IconColor="Color.Inherit" Match="NavLinkMatch.Prefix">Archiv</MudNavLink>
+    <MudNavLink Style="padding: 0 .8rem 0 .8rem;" uid="pagelink_archive" Icon="@Icons.Material.Filled.Logout" Href="/logout" IconColor="Color.Inherit" Match="NavLinkMatch.Prefix">Logout</MudNavLink>
+</MudNavMenu>
+<MudSpacer></MudSpacer>
+<MudStack Row="true" Justify="Justify.Center" Style="padding-bottom:5rem;">
+    <MudFab @onclick="OnDarkModeActivated" Size="Size.Small" Color="Color.Secondary" StartIcon="@themeIcon" />
+</MudStack>
+
+@code{
+
+    string themeIcon = Icons.Material.Filled.DarkMode;
+
+    [Parameter]
+    public bool IsDarkMode { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> IsDarkModeChanged { get; set; }
+
+    private Task OnDarkModeActivated ()
+    {
+        themeIcon = IsDarkMode ? Icons.Material.Filled.DarkMode : Icons.Material.Filled.LightMode;
+        IsDarkMode = !IsDarkMode;
+
+        return IsDarkModeChanged.InvokeAsync(IsDarkMode);
+    }
+}

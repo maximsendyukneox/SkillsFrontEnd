@@ -2,22 +2,16 @@
 
 
 
-<MudThemeProvider/>
+<MudThemeProvider @bind-IsDarkMode="@isDarkMode" Theme="@neoxTheme" />
 <MudDialogProvider />
 <MudSnackbarProvider />
 
 <MudLayout>
-    <MudAppBar Elevation="1" Style="background:rgb(30,30,30);">
-        <MudIconButton uid="app_btnMenu" Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
-        <MudNavLink uid="app_logo" Href="/" Match="NavLinkMatch.All" Style="width:fit-content;height:inherit;margin-left:0;padding: 10px 10px 10px 0px; ">
-           <MudImage Src="./Images/logo/neoxLogoWhite.svg" Alt="neox Logo" Style="width:10rem;"></MudImage>
-        </MudNavLink>    
-    </MudAppBar>
-    <MudDrawer uid="app_drawer" @bind-Open="_drawerOpen" ClipMode="DrawerClipMode.Always" Elevation="2" Style="color:black;background-color:white;">
-        <MyNavMenu>
+    <MudDrawer uid="app_drawer" @bind-Open="_drawerOpen" ClipMode="DrawerClipMode.Never" Elevation="2" Style="color:white ; height:100vh" Color="Color.Primary">
+        <MyNavMenu @bind-IsDarkMode="@isDarkMode">
         </MyNavMenu>
     </MudDrawer>
-    <MudMainContent Style="background:whitesmoke; height:100vh">
+    <MudMainContent Style="background:whitesmoke; height:100vh; padding:0;">
         @Body
     </MudMainContent>
 </MudLayout>
@@ -25,6 +19,33 @@
 
 @code {
     bool _drawerOpen = true;
+    bool isDarkMode;
+
+    MudTheme neoxTheme = new MudTheme()
+        {
+            Palette = new PaletteLight()
+            {
+                Primary = new("#243246"), // dunkles neox blau
+                Secondary = new("#4b7396"), // helles neox blau
+                Tertiary = new("#fff"),
+                AppbarBackground = Colors.Red.Default
+            },
+            PaletteDark = new PaletteDark()
+            {
+                Primary = Colors.Grey.Darken4,
+                Secondary = Colors.Grey.Darken4,
+                Tertiary = new("#fff"),
+                AppbarBackground = Colors.Brown.Darken1
+            },
+            Typography = new Typography()
+            {
+                Default = new Default()
+                {
+                    FontFamily = new[] {"Roboto","Poppins", "sans-serif" }
+                }
+            }
+
+        };
 
     void DrawerToggle()
     {
