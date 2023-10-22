@@ -1,11 +1,11 @@
 ﻿@inherits LayoutComponentBase
 
 
-<MudNavMenu Color="Color.Info" Style="font-size:1rem;}" Class="d-flex flex-column justify-center align-center">
+<MudNavMenu Color="Color.Tertiary" Style="font-size:1rem; color:white;" Class="d-flex flex-column justify-center align-center">
     <MudNavLink uid="app_logo" Href="/" Match="NavLinkMatch.All" Style="width:fit-content;margin-left:0;padding: 20px 20px 0 0; margin-top:1rem;margin-bottom:2rem; }">
-    <MudImage Src="./Images/logo/neoxLogoWhite.svg" Alt="neox Logo" Style="width:100%;"></MudImage>
+       <MudImage Src=@(IsDarkMode ? "./Images/logo/neoxLogoWhite.svg" : "./Images/logo/neoxLogoWhite.svg") Alt="neox Logo" Style="width:100%;"></MudImage>
     </MudNavLink>
-    <MudNavLink Style="padding: 0 .8rem 0 .8rem;" uid="pagelink_searchEmployees" Icon="@Icons.Material.Filled.Groups" Href="/search-employees" IconColor="Color.Inherit" Match="NavLinkMatch.Prefix">Mitarbeiter</MudNavLink>
+    <MudNavLink Style="padding: 0 .8rem 0 .8rem;" uid="pagelink_searchEmployees" Icon="@Icons.Material.Filled.Groups" Href="/employees" IconColor="Color.Inherit" Match="NavLinkMatch.Prefix">Mitarbeiter</MudNavLink>
     <MudNavLink Style="padding: 0 .8rem 0 .8rem;" uid="pagelink_searchBySkill" Icon="@Icons.Material.Filled.ManageSearch" Href="/search-byskill" IconColor="Color.Inherit" Match="NavLinkMatch.Prefix">Suche</MudNavLink>
     <MudNavLink Style="padding: 0 .8rem 0 .8rem;" uid="pagelink_archive" Icon="@Icons.Material.Filled.GroupOff" Href="/archive" IconColor="Color.Inherit" Match="NavLinkMatch.Prefix">Archiv</MudNavLink>
     <MudNavLink Style="padding: 0 .8rem 0 .8rem;" uid="pagelink_archive" Icon="@Icons.Material.Filled.Logout" Href="/logout" IconColor="Color.Inherit" Match="NavLinkMatch.Prefix">Logout</MudNavLink>

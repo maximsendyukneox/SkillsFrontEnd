@@ -7,11 +7,11 @@
 <MudSnackbarProvider />
 
 <MudLayout>
-    <MudDrawer uid="app_drawer" @bind-Open="_drawerOpen" ClipMode="DrawerClipMode.Never" Elevation="2" Style="color:white ; height:100vh" Color="Color.Primary">
+    <MudDrawer uid="app_drawer" @bind-Open="_drawerOpen" ClipMode="DrawerClipMode.Never" Elevation="2" Style="height:100vh;" Color="Color.Primary">
         <MyNavMenu @bind-IsDarkMode="@isDarkMode">
         </MyNavMenu>
     </MudDrawer>
-    <MudMainContent Style="background:whitesmoke; height:100vh; padding:0;">
+    <MudMainContent Style="height:100vh; padding:0;">
         @Body
     </MudMainContent>
 </MudLayout>
@@ -25,16 +25,16 @@
         {
             Palette = new PaletteLight()
             {
-                Primary = new("#243246"), // dunkles neox blau
-                Secondary = new("#4b7396"), // helles neox blau
-                Tertiary = new("#fff"),
+                Primary = new("#4b7396"), // #243246 dunkles neox blau
+                Secondary = new("#4b7396"), // #4b7396 helles neox blau
+                Tertiary = new("#DDE6ED"),
                 AppbarBackground = Colors.Red.Default
             },
             PaletteDark = new PaletteDark()
             {
-                Primary = Colors.Grey.Darken4,
-                Secondary = Colors.Grey.Darken4,
-                Tertiary = new("#fff"),
+                Primary = new("#121212"), // vordergrund
+                Secondary = new("#121212"), // hintergrund
+                Tertiary = new("#535353"), // 
                 AppbarBackground = Colors.Brown.Darken1
             },
             Typography = new Typography()

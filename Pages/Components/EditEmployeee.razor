@@ -3,7 +3,7 @@
 @using System.Threading;
 @using System.ComponentModel.DataAnnotations
 @using System.Linq
-
+@inject NavigationManager nav
 
 <MudDialog Class="pa-4">
     <DialogContent>
@@ -36,8 +36,8 @@
                                     </MudSelect>
                                 </MudPaper>
                                 <MudPaper Elevation="0" Class="d-flex flex-auto" Width="10%" Style=" padding: .4rem 0 0 0;">
-									<MudIconButton uid="btn_addSkill" Style="height:3.3rem; width:100%;" Variant="Variant.Filled" Color="Color.Secondary" Icon="@Icons.Material.Filled.Add" @onclick="AddNewProficiency"></MudIconButton>
-                                </MudPaper>
+                                    <MudIconButton uid="btn_addSkill" Style="height:3.3rem; width:100%;" Variant="Variant.Filled" Color="Color.Secondary" Icon="@Icons.Material.Filled.Add" @onclick="AddNewProficiency"></MudIconButton>
+                                </MudPaper>                
                             </MudPaper>
                         </MudItem>
                         <MudItem xs="12">
@@ -57,7 +57,7 @@
                         <MudItem xs="12">
                             <MudStack Row="true" Style="margin-top:1rem;">
                                 <MudButton uid="btn_save" Style="width:8rem;" @onclick="SubmitHandler" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Save" Color="Color.Secondary" Size="Size.Medium">Speichern</MudButton>
-                                <MudButton uid="btn_cancel" Style="width:8rem;" OnClick="Cancel" Variant="Variant.Outlined" Color="Color.Secondary" Size="Size.Medium">Abbrechen</MudButton>
+                                <MudButton uid="btn_cancel" Style="width:8rem;" @onclick="Cancel" Variant="Variant.Outlined" Color="Color.Secondary" Size="Size.Medium">Abbrechen</MudButton>
                             </MudStack>
                         </MudItem>
                         <MudItem xs="12">
@@ -77,10 +77,9 @@
     </DialogContent>
 </MudDialog>
 
-@code {
-    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
 
-    List<ProficiencyBaseDTO> proficienciesDTO = new();
+@code {
+    private List<ProficiencyBaseDTO> proficienciesDTO;
     private string newProficiency = String.Empty;
     private ProficiencyLevel proficiencyLevel = ProficiencyLevel.Basic;
     private bool isError = false;
@@ -88,50 +87,35 @@
     private string error = "";
     private bool isSuccess = false;
     private string ErrorText { get; set; } = String.Empty;
-    SaveEmployeeForm model = new SaveEmployeeForm();
-    List<Proficiency> tableData = new();
-    List<string> proficiencies = new();
+    private SaveEmployeeForm model = new SaveEmployeeForm();
+    private List<Proficiency> employeeProficiencies = new();
+    private Employee employee = new();
+    private List<string> skills = new();
+    private List<ProficiencyBaseDTO> proficienciesToAdd = new();
+    private List<Proficiency> proficienciesToDelete = new();
+    private MudMessageBox deleteMessageBox { get; set; }
     private EditContext editContext { get; set; }
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+    [Parameter] public string Id { get; set; } = "";
 
-
-    protected override async Task OnInitializedAsync()
+    protected async override Task OnInitializedAsync()
     {
         editContext = new EditContext(model);
+        proficienciesDTO = new();
+        employee = await Program.client.GetEmployeeAsync(Convert.ToInt32(Id));
+        model.FirstName = employee.FirstName;
+        model.LastName = employee.LastName;
+        model.Date = employee.Birthday;
+
+        employeeProficiencies = await Program.client.GetProficiencyAsync(employee.Id);
+
+        skills = await Program.client.GetSkillsAsync();
+
+        foreach (var p in employeeProficiencies)
+        {
+            proficienciesDTO.Add(new ProficiencyBaseDTO(p.Skill.Name, p.Level));
+        }
         await base.OnInitializedAsync();
-        try
-        {
-            proficiencies = await Program.client.GetSkillsAsync();
-        }
-        catch (InvalidOperationException ex)
-        {
-            Console.WriteLine(ex);
-        }
-    }
-
-    private async void SubmitHandler()
-    {
-        isSuccess = false;
-        if (editContext.Validate())
-        {
-            await SaveEmployee();
-        }
-    }
-
-    private async Task<IEnumerable<string>> SearchProficiency(string value)
-    {
-        // In real life use an asynchronous function for fetching data from an api.
-        await Task.Delay(5);
-
-        // if text is null or empty, show complete list
-        if (string.IsNullOrEmpty(value))
-            return proficiencies;
-        return proficiencies.Where(x => x.Contains(value, StringComparison.InvariantCultureIgnoreCase));
-    }
-
-    private void OnProficiencyChanged(string selectedProficiency)
-    {
-        newProficiency = selectedProficiency;
-        isError = false;
     }
 
     private void AddNewProficiency()
@@ -147,13 +131,78 @@
         };
 
         proficienciesDTO.Add(new(newProficiency, proficiencyLevel));
+        proficienciesToAdd.Add(new(newProficiency, proficiencyLevel));
         newProficiency = string.Empty;
-        isError = false;
     }
 
     private void RemoveProficiency(ProficiencyBaseDTO rowData)
     {
-        proficienciesDTO.RemoveAll(dto => dto.SkillName == rowData.SkillName && dto.SkillLevel == rowData.SkillLevel);
+        proficienciesDTO.RemoveAll(p => p.SkillName == rowData.SkillName && p.SkillLevel == rowData.SkillLevel);
+        proficienciesToAdd.RemoveAll(p => p.SkillName == rowData.SkillName && p.SkillLevel == rowData.SkillLevel);
+        StateHasChanged();
+        if (employeeProficiencies.Any(p => p.Skill.Name == rowData.SkillName && p.Level == rowData.SkillLevel))
+        {
+            proficienciesToDelete.Add(employeeProficiencies.Find(p => p.Skill.Name == rowData.SkillName && p.Level == rowData.SkillLevel));
+        }
+    }
+
+    private async Task DeleteEmployee()
+    {
+        bool? result = await deleteMessageBox.Show();
+        if (result == false)
+            return;
+        else
+        {
+            await Program.client.DeleteEmployeeAsync(employee.Id);
+            nav.NavigateTo("/search-employee");
+        }
+        StateHasChanged();
+    }
+
+    private async void SubmitHandler()
+    {
+        isSuccess = false;
+        if (editContext.Validate())
+        {
+            await SaveChanges(editContext);
+        }
+    }
+
+    private void Cancel()
+    {
+        MudDialog.Cancel();
+    }
+
+    private async Task SaveChanges(EditContext context)
+    {
+        try
+        {
+            await Program.client.UpdateEmployeeAsync(new EmployeeDTO(model.FirstName, model.LastName, model.Date!.Value.ToShortDateString(), Convert.ToInt32(Id)));
+        }
+        catch (Exception ex)
+        {
+            isException = true;
+            ErrorText = ex.Message;
+            StateHasChanged();
+            return;
+        }
+        foreach (var proficiency in proficienciesToAdd)
+        {
+            await Program.client.CreateProficiencyAsync
+            (
+                new SkillsBackend.ProficiencyBaseDTO_withOwner
+                (
+                    proficiency.SkillName,
+                    proficiency.SkillLevel,
+                    employee.Id
+                )
+            );
+        }
+        foreach (var proficiency in proficienciesToDelete)
+        {
+            await Program.client.DeleteProficiencyAsync(proficiency.Id);
+        }
+        MudDialog.Close(DialogResult.Ok(true));
     }
 
     private void OnInputChanged(KeyboardEventArgs e)
@@ -168,31 +217,20 @@
         isException = false;
     }
 
-    private void Cancel()
+    private void OnProficiencyChanged(string selectedProficiency)
     {
-        MudDialog.Cancel();
+        newProficiency = selectedProficiency;
+        isError = false;
     }
 
-    private async Task SaveEmployee()
+    private async Task<IEnumerable<string>> SearchProficiency(string value)
     {
-        isError = false;
-        isException = false;
-        Employee employee = null;
-        try
-        {
-            employee = await Program.client.CreateEmployeeAsync(new EmployeeDTO_keyless(model.FirstName.Trim(), model.LastName.Trim(), model.Date!.Value.ToShortDateString(), true));
-        }
-        catch (Exception ex)
-        {
-            isException = true;
-            ErrorText = ex.Message;
-            StateHasChanged();
-            return;
-        }
-        foreach (var proficiencyDTO in proficienciesDTO)
-        {
-            await Program.client.CreateProficiencyAsync(new SkillsBackend.ProficiencyBaseDTO_withOwner(proficiencyDTO.SkillName, proficiencyDTO.SkillLevel, employee.Id));
-        }
-        MudDialog.Close(DialogResult.Ok(true));
+        // In real life use an asynchronous function for fetching data from an api.
+        await Task.Delay(5);
+
+        // if text is null or empty, show complete list
+        if (string.IsNullOrEmpty(value))
+            return skills;
+        return skills.Where(x => x.Contains(value, StringComparison.InvariantCultureIgnoreCase));
     }
 }

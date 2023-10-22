@@ -1,4 +1,14 @@
 ﻿@page "/"
+@inject NavigationManager nav
 
 <PageTitle>neox AG für Informationstechnologie</PageTitle>
+
+@code{
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        nav.NavigateTo("/employees");
+    }
+}
 
