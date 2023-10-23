@@ -19,7 +19,7 @@
                             <MudTextField uid="input_lastName" OnKeyUp="OnInputChanged" @bind-Value="model.LastName" For="@(()=> model.LastName)" Label="Nachname" Variant="Variant.Outlined"></MudTextField>
                         </MudItem>
                         <MudItem xs="12">
-                            <MudDatePicker uid="input_birthday" @onkeyup="OnInputChanged" DateFormat="dd.MM.yyyy" Color="Color.Info" PickerOpened="OnDatePickerOpened" For="@(()=> model.Date)" ErrorText="Kein valides Datumsformat" Label="Geburtsdatum" @bind-Date="model.Date" MaxDate="DateTime.Now" Variant="Variant.Outlined" Editable="true" />
+                            <MudDatePicker uid="input_birthday" @onkeyup="OnInputChanged" DateFormat="dd.MM.yyyy" Color="Color.Secondary" PickerOpened="OnDatePickerOpened" For="@(()=> model.Date)" ErrorText="Kein valides Datumsformat" Label="Geburtsdatum" @bind-Date="model.Date" MaxDate="DateTime.Now" Variant="Variant.Outlined" Editable="true" />
                         </MudItem>
                         <MudItem xs="12">
                             <MudPaper Class="d-flex gap-2" Elevation="0">
@@ -50,7 +50,7 @@
                                 <RowTemplate Context="ctx">
                                     <MudTd uid=@($"table_skillName_{ctx.SkillName}") Style="padding:10px 10px 10px 10px;" DataLabel="Kenntnis">@ctx.SkillName</MudTd>
                                     <MudTd uid=@($"table_skillLevel_{ctx.SkillName}_{ctx.SkillLevel}") Style="padding:10px 10px 10px 10px;" DataLabel="Stufe">@ctx.SkillLevel</MudTd>
-                                    <MudTd uid=@($"table_btnDelete_{ctx.SkillName}") Style="padding:10px 10px 10px 10px;" DataLabel=""><MudIconButton Icon="@Icons.Material.Filled.Clear" aria-label="delete" @onclick="@(()=>RemoveProficiency(ctx))" Color="Color.Error"></MudIconButton></MudTd>
+                                    <MudTd Style="padding:10px 10px 10px 10px;" DataLabel=""><MudIconButton uid=@($"table_btnDelete_{ctx.SkillName}") Icon="@Icons.Material.Filled.Clear" aria-label="delete" @onclick="@(()=>RemoveProficiency(ctx))" Color="Color.Error"></MudIconButton></MudTd>
                                 </RowTemplate>
                             </MudTable>
                         </MudItem>
