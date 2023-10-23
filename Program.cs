@@ -1,13 +1,6 @@
-using Flurl;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Web;
 using SkillsBackend.Client;
 using SkillsDatabase;
-using SkillsFrontEnd.Data;
-using System.Net;
-using System.Net.Http;
 using MudBlazor.Services;
-
 
 namespace SkillsFrontEnd;
 
@@ -16,9 +9,9 @@ public class Program
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor.
     public static SkillsClient client { get; private set; }
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor.
-
     public static void Main(string[] args)
     {
+        
         client = new SkillsClient(Constants.API_BASE_URI, "Integration_Test");
         var builder = WebApplication.CreateBuilder(args);
       

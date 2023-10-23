@@ -1,0 +1,153 @@
+﻿@page "/employees"
+<PageTitle>neox AG Mitarbeiterübersicht</PageTitle>
+
+@using SkillsDatabase
+@using SkillsBackend.Client
+@using Microsoft.EntityFrameworkCore
+@using Components
+@inject NavigationManager nav
+@inject IDialogService DialogService
+
+<MudContainer MaxWidth="MaxWidth.Large" >
+    <MudGrid Spacing="2" Class="mt-4 mud-theme-background">
+        <MudItem xs="12">
+            <MudHidden Breakpoint="Breakpoint.Xs">
+                <MudPaper Style="" Elevation="3">
+                    <MudStack Row="true" Class="pa-6 d-flex align-center">
+                    <MudText uid="table_title" Typo="Typo.h6">Mitarbeiterübersicht</MudText>
+                    <MudSpacer></MudSpacer>
+                        <MudButton @onclick="OpenCreateEmployeeDialog" Variant="Variant.Filled" Size="Size.Small" Color="Color.Secondary" Style="height:2.5rem; width:14rem;" StartIcon="@Icons.Material.Filled.PersonAdd">Mitarbeiter hinzufügen</MudButton>
+                    </MudStack>
+                </MudPaper>
+            </MudHidden>
+        </MudItem>
+        <MudHidden Breakpoint="Breakpoint.SmAndUp">
+            <MudItem xs="12">
+            <MudButton @onclick="OpenCreateEmployeeDialog" Variant="Variant.Outlined" Size="Size.Small" Color="Color.Secondary" Style="height:2.5rem;" FullWidth="true" StartIcon="@Icons.Material.Filled.PersonAdd">Mitarbeiter hinzufügen</MudButton>
+            </MudItem>
+        </MudHidden>
+        <MudItem xs="12" Style="height: 100%;">
+            <MudTable Items="@employees" Class="mud-theme-surface" RowsPerPage="25" Elevation="4" Loading="@loading" LoadingProgressColor="Color.Info" Dense="true" Filter="new Func<Employee,bool>(FilterFunc1)" @bind-SelectedItem="selectedEmployee">
+                <ToolBarContent>
+                    <MudTextField uid="table_searchField" @bind-Value="searchString1" Immediate="true" Placeholder="Suchen" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+                    <MudSpacer />
+                </ToolBarContent>
+                <HeaderContent>
+                    <MudTh uid="table_column_firstName">Vorname</MudTh>
+                    <MudTh uid="table_column_lastName">Nachname</MudTh>
+                    <MudTh uid="table_column_birthday">Geburtsdatum</MudTh>
+                    <MudTh uid="table_column_action">Aktion</MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd uid=@($"table_firstName_{context.FirstName}") DataLabel="Vorname">@context.FirstName</MudTd>
+                    <MudTd uid=@($"table_lastName_{context.LastName}") DataLabel="Nachname">@context.LastName</MudTd>
+                    <MudTd uid=@($"table_birthday_{context.FirstName}") DataLabel="Geburtsdatum">@context.Birthday.ToShortDateString()</MudTd>
+                    <MudTd uid="btn_editEmployee" DataLabel="Aktion">
+                        <MudTooltip Text="Bearbeiten">
+                        <MudIconButton @onclick="@(()=>OpenEditEmployeeDialog(context))" Size="Size.Medium" Color="Color.Secondary" Icon="@Icons.Material.Filled.EditNote" />
+                        </MudTooltip>
+                        <MudTooltip Text="Löschen">
+                        <MudIconButton @onclick="@(()=>DeleteEmployee(context))" Size="Size.Small" Color="Color.Error" Icon="@Icons.Material.Filled.DeleteForever" />
+                        </MudTooltip>
+                    </MudTd>
+                </RowTemplate>
+                <PagerContent>
+                    <MudTablePager uid ="table_pager"/>
+                </PagerContent>
+            </MudTable>
+        </MudItem>
+    </MudGrid>
+</MudContainer>
+
+<MudMessageBox uid="msgBox" @ref="deleteMessageBox">
+    <TitleContent>
+        <MudStack Row="true" Justify="Justify.FlexStart" AlignItems="AlignItems.Center">
+            <MudIcon Icon="@Icons.Material.Filled.Warning" />
+            <MudText Typo="Typo.h6">Achtung</MudText>
+        </MudStack>
+    </TitleContent>
+    <MessageContent>
+        <MudText uid="msgBox_message">Diesen Mitarbeiter wirklich löschen?</MudText>
+    </MessageContent>
+    <YesButton>
+        <MudButton uid="msgBox_btnDelete" Variant="Variant.Filled" Color="Color.Error">Löschen</MudButton>
+    </YesButton>
+    <NoButton>
+        <MudButton uid="msgBox_btnCancel" Variant="Variant.Text">Abbrechen</MudButton>
+    </NoButton>
+</MudMessageBox>
+
+@code {
+    private string searchString1 = "";
+    private Employee selectedEmployee = null;
+    private List<Employee> employees = new List<Employee>();
+    private bool loading = true;
+    private MudMessageBox deleteMessageBox { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        try
+        {
+            employees = await Program.client.GetEmployeesAsync();
+            loading = false;
+        }
+        catch (InvalidOperationException ex)
+        {
+            Console.WriteLine(ex);
+        }
+    }
+
+    private bool FilterFunc1(Employee employee) => FilterFunc(employee, searchString1);
+
+    private bool FilterFunc(Employee employee, string searchString)
+    {
+        if (string.IsNullOrWhiteSpace(searchString))
+            return true;
+        if (employee.FirstName.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (employee.LastName.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        return false;
+    }
+
+    private void EditEmployee(Employee employee)
+    {
+        nav.NavigateTo($"/edit-employee/{employee.Id}");
+    }
+
+    private async Task OpenCreateEmployeeDialog()
+    {
+        var options = new DialogOptions { CloseOnEscapeKey = true, DisableBackdropClick = true };
+        var dialog = DialogService.Show<NewEmployee>("Neuer Mitarbeiter", options);
+        var result = await dialog.Result;
+        if (!result.Canceled)
+        {
+            await OnInitializedAsync();
+        }
+    }
+
+    private async Task OpenEditEmployeeDialog(Employee employee)
+    {
+        var options = new DialogOptions { CloseOnEscapeKey = true, DisableBackdropClick = true };
+        var parameters = new DialogParameters { ["Id"] = employee.Id.ToString() };
+        var dialog = DialogService.Show<EditEmployeee>("Mitarbeiterdaten ändern", parameters, options);
+        var result = await dialog.Result;
+        if (!result.Canceled)
+        {
+            await OnInitializedAsync();
+        }
+    }
+
+    private async Task DeleteEmployee(Employee employee)
+    {
+        bool? result = await deleteMessageBox.Show();
+        if (result == false || result == null)
+            return;
+        else
+        {
+            await Program.client.DeleteEmployeeAsync(employee.Id);
+        }
+        await OnInitializedAsync();
+    }
+}

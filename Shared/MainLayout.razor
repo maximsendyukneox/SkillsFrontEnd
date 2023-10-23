@@ -1,34 +1,98 @@
 ﻿@inherits LayoutComponentBase
+@inject NavigationManager nav
 
 
-
-<MudThemeProvider/>
+<MudThemeProvider @bind-IsDarkMode="@isDarkMode" Theme="@neoxTheme" />
 <MudDialogProvider />
 <MudSnackbarProvider />
 
 <MudLayout>
-    <MudAppBar Elevation="1" Style="background:rgb(30,30,30);">
-        <MudIconButton uid="app_btnMenu" Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
-        <MudNavLink uid="app_logo" Href="/" Match="NavLinkMatch.All" Style="width:fit-content;height:inherit;margin-left:0;padding: 10px 10px 10px 0px; ">
-           <MudImage Src="./Images/logo/neoxLogoWhite.svg" Alt="neox Logo" Style="width:10rem;"></MudImage>
-        </MudNavLink>    
+    <MudAppBar Elevation="1" Color="Color.Primary">
+        <MudPaper Class="d-flex justify-center flex-grow-1 gap-12" Elevation="0" Style="background-color:inherit;">
+            <MudImage Src=@(isDarkMode ? "./Images/logo/neoxLogoWhite.svg" : "./Images/logo/neoxLogoWhite.svg") Alt="neox Logo" Style="width:7rem;" @onclick="NavigateHome"></MudImage>
+            <MudHidden Breakpoint="Breakpoint.SmAndDown">
+                <MudButton Href="/" Variant="Variant.Filled" DisableElevation="true" StartIcon="@Icons.Material.Filled.Groups" Color="Color.Primary">Mitarbeiter</MudButton>
+                <MudButton Href="/search-byskill" Variant="Variant.Filled" DisableElevation="true" StartIcon="@Icons.Material.Filled.ManageSearch" Color="Color.Primary">Suche</MudButton>
+                <MudButton Variant="Variant.Filled" DisableElevation="true" StartIcon="@Icons.Material.Filled.GroupOff" Color="Color.Primary">Archiv</MudButton>
+                <MudButton Variant="Variant.Filled" DisableElevation="true" StartIcon="@Icons.Material.Filled.Logout" Color="Color.Primary">Logout</MudButton>
+                <MudIconButton @onclick="OnDarkModeActivated" Size="Size.Small" Color="Color.Info" Icon="@themeIcon" />
+            </MudHidden>
+        </MudPaper>
+        <MudHidden Breakpoint="Breakpoint.MdAndUp">
+            <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
+        </MudHidden>
     </MudAppBar>
-    <MudDrawer uid="app_drawer" @bind-Open="_drawerOpen" ClipMode="DrawerClipMode.Always" Elevation="2" Style="color:black;background-color:white;">
-        <MyNavMenu>
-        </MyNavMenu>
+    <MudDrawer @bind-Open="_drawerOpen" Anchor="Anchor.Top" Variant="@DrawerVariant.Temporary" Elevation="2">
+        <MudDrawerHeader>
+            <MudText Typo="Typo.h5" Class="mt-1">Application</MudText>
+        </MudDrawerHeader>
+        <MudNavMenu>
+            <MudNavLink Icon="@Icons.Material.Filled.Groups" Match="NavLinkMatch.All">Mitarbeiter</MudNavLink>
+            <MudNavLink Icon="@Icons.Material.Filled.ManageSearch" Match="NavLinkMatch.All">Suche</MudNavLink>
+            <MudNavLink Icon="@Icons.Material.Filled.GroupOff" Match="NavLinkMatch.All">Archiv</MudNavLink>
+            <MudNavLink Icon="@Icons.Material.Filled.Logout" Match="NavLinkMatch.All">Logout</MudNavLink>
+        </MudNavMenu>
     </MudDrawer>
-    <MudMainContent Style="background:whitesmoke; height:100vh">
+    <MudMainContent Class="mud-theme-background">    
         @Body
     </MudMainContent>
 </MudLayout>
 
 
 @code {
-    bool _drawerOpen = true;
+    bool _drawerOpen = false;
+    bool isDarkMode;
+    string themeIcon = Icons.Material.Filled.DarkMode;
+
+
+    MudTheme neoxTheme = new MudTheme()
+        {
+            Palette = new PaletteLight()
+            {
+                Primary = "#303030", // #243246 dunkles neox blau
+                Secondary = "#4b7396", // #4b7396 helles neox blau
+                Tertiary = "#DDE6ED",
+                Info = "#fff",
+                Surface = "#fff",
+                TextPrimary = "#000",
+                Background = "#f5f5f5",
+                Error = "#ff0000",           
+            },
+            PaletteDark = new PaletteDark()
+            {
+                Primary = "#191A1C", // vordergrund
+                Secondary = "#029ce3", // hintergrund
+                Tertiary = "#535353", //                
+                Info = "#ffff00",
+                Surface = "#303030",
+                TextPrimary = "#fff",
+                Background = "#121212",
+                Error = "#ff0000",              
+            },
+            Typography = new Typography()
+            {
+                Default = new Default()
+                {
+                    FontFamily = new[] {"Nunito Sans","Roboto","Poppins", "sans-serif" }
+                }
+            }
+
+        };
 
     void DrawerToggle()
     {
         _drawerOpen = !_drawerOpen;
+    }
+
+    private void OnDarkModeActivated()
+    {
+        themeIcon = isDarkMode ? Icons.Material.Filled.DarkMode : Icons.Material.Filled.LightMode;
+        isDarkMode = !isDarkMode;
+    }
+
+    private void NavigateHome ()
+    {
+        nav.NavigateTo("/");
     }
 }
 

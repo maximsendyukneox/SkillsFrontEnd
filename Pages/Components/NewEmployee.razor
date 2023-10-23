@@ -1,0 +1,198 @@
+﻿@using SkillsDatabase
+@using System
+@using System.Threading;
+@using System.ComponentModel.DataAnnotations
+@using System.Linq
+
+
+<MudDialog Class="pa-4">
+    <DialogContent>
+        <MudGrid>
+            <MudItem xs="12">
+                <EditForm EditContext="@editContext">
+                    <DataAnnotationsValidator />
+                    <MudGrid Spacing="1">
+                        <MudItem xs="12">
+                            <MudTextField uid="input_firstName" OnKeyUp="OnInputChanged" @bind-Value="model.FirstName" For="@(()=> model.FirstName)" Label="Vorname" Variant="Variant.Outlined"></MudTextField>
+                        </MudItem>
+                        <MudItem xs="12">
+                            <MudTextField uid="input_lastName" OnKeyUp="OnInputChanged" @bind-Value="model.LastName" For="@(()=> model.LastName)" Label="Nachname" Variant="Variant.Outlined"></MudTextField>
+                        </MudItem>
+                        <MudItem xs="12">
+                            <MudDatePicker uid="input_birthday" @onkeyup="OnInputChanged" DateFormat="dd.MM.yyyy" Color="Color.Info" PickerOpened="OnDatePickerOpened" For="@(()=> model.Date)" ErrorText="Kein valides Datumsformat" Label="Geburtsdatum" @bind-Date="model.Date" MaxDate="DateTime.Now" Variant="Variant.Outlined" Editable="true" />
+                        </MudItem>
+                        <MudItem xs="12">
+                            <MudPaper Class="d-flex gap-2" Elevation="0">
+                                <MudPaper Elevation="0" Class="d-flex flex-auto" Width="45%">
+                                    <MudAutocomplete uid="input_skillName" T="string" Label="Kenntnis" Text="@newProficiency" Value="@newProficiency" ValueChanged="OnProficiencyChanged" SearchFunc="@SearchProficiency"
+                                                     MaxItems="null" Variant="Variant.Outlined" Error="@isError" ErrorText="@error" CoerceText="true" CoerceValue="true" Style="" />
+                                </MudPaper>
+                                <MudPaper Elevation="0" Class="d-flex flex-auto" Width="45%" MaxWidth="45%">
+                                    <MudSelect uid="input_skillLevel" Label="Stufe" Variant="Variant.Outlined" @bind-Value="proficiencyLevel">
+                                        @foreach (ProficiencyLevel profLevel in Enum.GetValues(typeof(ProficiencyLevel)))
+                                        {
+                                            <MudSelectItem uid=@($"skillLevel_{profLevel}") Value="@profLevel">@profLevel</MudSelectItem>
+                                        }
+                                    </MudSelect>
+                                </MudPaper>
+                                <MudPaper Elevation="0" Class="d-flex flex-auto" Width="10%" Style=" padding: .4rem 0 0 0;">
+									<MudIconButton uid="btn_addSkill" Style="height:3.3rem; width:100%;" Variant="Variant.Filled" Color="Color.Secondary" Icon="@Icons.Material.Filled.Add" @onclick="AddNewProficiency"></MudIconButton>
+                                </MudPaper>
+                            </MudPaper>
+                        </MudItem>
+                        <MudItem xs="12">
+                            <MudTable Items="@proficienciesDTO" Outlined="true" Style="padding:0;margin-top:1rem;">
+                                <HeaderContent>
+                                    <MudTh uid="table_column_skillName" Style="padding:10px 10px 10px 10px;">Kenntnis</MudTh>
+                                    <MudTh uid="table_column_skillLevel" Style="padding:10px 10px 10px 10px;">Stufe</MudTh>
+                                    <MudTh uid="table_column_action" Style="padding:10px 10px 10px 10px;"></MudTh>
+                                </HeaderContent>
+                                <RowTemplate Context="ctx">
+                                    <MudTd uid=@($"table_skillName_{ctx.SkillName}") Style="padding:10px 10px 10px 10px;" DataLabel="Kenntnis">@ctx.SkillName</MudTd>
+                                    <MudTd uid=@($"table_skillLevel_{ctx.SkillName}_{ctx.SkillLevel}") Style="padding:10px 10px 10px 10px;" DataLabel="Stufe">@ctx.SkillLevel</MudTd>
+                                    <MudTd uid=@($"table_btnDelete_{ctx.SkillName}") Style="padding:10px 10px 10px 10px;" DataLabel=""><MudIconButton Icon="@Icons.Material.Filled.Clear" aria-label="delete" @onclick="@(()=>RemoveProficiency(ctx))" Color="Color.Error"></MudIconButton></MudTd>
+                                </RowTemplate>
+                            </MudTable>
+                        </MudItem>
+                        <MudItem xs="12">
+                            <MudStack Row="true" Style="margin-top:1rem;">
+                                <MudButton uid="btn_save" Style="width:8rem;" @onclick="SubmitHandler" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Save" Color="Color.Secondary" Size="Size.Medium">Speichern</MudButton>
+                                <MudButton uid="btn_cancel" Style="width:8rem;" OnClick="Cancel" Variant="Variant.Outlined" Color="Color.Secondary" Size="Size.Medium">Abbrechen</MudButton>
+                            </MudStack>
+                        </MudItem>
+                        <MudItem xs="12">
+                            @* @if (isSuccess)
+                            {
+                                <MudAlert Style="margin-top: 1rem;" Severity="Severity.Success">Speichern erfolgreich</MudAlert>
+                            } *@
+                            @if (isException)
+                            {
+                                <MudAlert Severity="Severity.Error">@ErrorText</MudAlert>
+                            }
+                        </MudItem>
+                    </MudGrid>
+                </EditForm>
+            </MudItem>
+        </MudGrid>
+    </DialogContent>
+</MudDialog>
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+    List<ProficiencyBaseDTO> proficienciesDTO = new();
+    private string newProficiency = String.Empty;
+    private ProficiencyLevel proficiencyLevel = ProficiencyLevel.Basic;
+    private bool isError = false;
+    private bool isException = false;
+    private string error = "";
+    private bool isSuccess = false;
+    private string ErrorText { get; set; } = String.Empty;
+    SaveEmployeeForm model = new SaveEmployeeForm();
+    List<Proficiency> tableData = new();
+    List<string> proficiencies = new();
+    private EditContext editContext { get; set; }
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        editContext = new EditContext(model);
+        await base.OnInitializedAsync();
+        try
+        {
+            proficiencies = await Program.client.GetSkillsAsync();
+        }
+        catch (InvalidOperationException ex)
+        {
+            Console.WriteLine(ex);
+        }
+    }
+
+    private async void SubmitHandler()
+    {
+        isSuccess = false;
+        if (editContext.Validate())
+        {
+            await SaveEmployee();
+        }
+    }
+
+    private async Task<IEnumerable<string>> SearchProficiency(string value)
+    {
+        // In real life use an asynchronous function for fetching data from an api.
+        await Task.Delay(5);
+
+        // if text is null or empty, show complete list
+        if (string.IsNullOrEmpty(value))
+            return proficiencies;
+        return proficiencies.Where(x => x.Contains(value, StringComparison.InvariantCultureIgnoreCase));
+    }
+
+    private void OnProficiencyChanged(string selectedProficiency)
+    {
+        newProficiency = selectedProficiency;
+        isError = false;
+    }
+
+    private void AddNewProficiency()
+    {
+        if (string.IsNullOrEmpty(newProficiency))
+            return;
+
+        if ((proficienciesDTO.Any(p => p.SkillName == newProficiency)))
+        {
+            error = "Kenntnis bereits hinzugefügt";
+            isError = true;
+            return;
+        };
+
+        proficienciesDTO.Add(new(newProficiency, proficiencyLevel));
+        newProficiency = string.Empty;
+        isError = false;
+    }
+
+    private void RemoveProficiency(ProficiencyBaseDTO rowData)
+    {
+        proficienciesDTO.RemoveAll(dto => dto.SkillName == rowData.SkillName && dto.SkillLevel == rowData.SkillLevel);
+    }
+
+    private void OnInputChanged(KeyboardEventArgs e)
+    {
+        isSuccess = false;
+        isException = false;
+    }
+
+    private void OnDatePickerOpened()
+    {
+        isSuccess = false;
+        isException = false;
+    }
+
+    private void Cancel()
+    {
+        MudDialog.Cancel();
+    }
+
+    private async Task SaveEmployee()
+    {
+        isError = false;
+        isException = false;
+        Employee employee = null;
+        try
+        {
+            employee = await Program.client.CreateEmployeeAsync(new EmployeeDTO_keyless(model.FirstName.Trim(), model.LastName.Trim(), model.Date!.Value.ToShortDateString(), true));
+        }
+        catch (Exception ex)
+        {
+            isException = true;
+            ErrorText = ex.Message;
+            StateHasChanged();
+            return;
+        }
+        foreach (var proficiencyDTO in proficienciesDTO)
+        {
+            await Program.client.CreateProficiencyAsync(new SkillsBackend.ProficiencyBaseDTO_withOwner(proficiencyDTO.SkillName, proficiencyDTO.SkillLevel, employee.Id));
+        }
+        MudDialog.Close(DialogResult.Ok(true));
+    }
+}
