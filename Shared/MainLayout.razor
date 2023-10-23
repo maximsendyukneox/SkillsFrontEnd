@@ -11,7 +11,7 @@
         <MudPaper Class="d-flex justify-center flex-grow-1 gap-12" Elevation="0" Style="background-color:inherit;">
             <MudImage Src=@(isDarkMode ? "./Images/logo/neoxLogoWhite.svg" : "./Images/logo/neoxLogoWhite.svg") Alt="neox Logo" Style="width:7rem;" @onclick="NavigateHome"></MudImage>
             <MudHidden Breakpoint="Breakpoint.SmAndDown">
-                <MudButton Href="/" Variant="Variant.Filled" DisableElevation="true" StartIcon="@Icons.Material.Filled.Groups" Color="Color.Primary">Mitarbeiter</MudButton>
+                <MudButton uid="navmenu_employees" Href="/" Variant="Variant.Filled" DisableElevation="true" StartIcon="@Icons.Material.Filled.Groups" Color="Color.Primary">Mitarbeiter</MudButton>
                 <MudButton Href="/search-byskill" Variant="Variant.Filled" DisableElevation="true" StartIcon="@Icons.Material.Filled.ManageSearch" Color="Color.Primary">Suche</MudButton>
                 <MudButton Variant="Variant.Filled" DisableElevation="true" StartIcon="@Icons.Material.Filled.GroupOff" Color="Color.Primary">Archiv</MudButton>
                 <MudButton Variant="Variant.Filled" DisableElevation="true" StartIcon="@Icons.Material.Filled.Logout" Color="Color.Primary">Logout</MudButton>

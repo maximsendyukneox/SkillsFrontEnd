@@ -3,7 +3,55 @@
 @using System.Linq
 @using System.Collections.Generic
 
-<MudPaper Class="pa-8 ma-2" Elevation="3">
+<MudContainer MaxWidth="MaxWidth.Large">
+    <MudGrid Spacing="2" Class="mt-4 mud-theme-background">
+        <MudItem xs="12">
+                <MudText uid="page_title" Typo="Typo.h6">Kenntnisbasierte Mitarbeitersuche</MudText> 
+                <MudPaper Elevation="0" Class="d-flex gap-2">
+                    <MudPaper Elevation="0" >
+
+                    </MudPaper>
+                    <MudAutocomplete uid="input_skillName" Style="width:20rem;" T="string" Label="Kenntnis" Text="@proficiency" Value="@proficiency" ValueChanged="OnProficiencyChanged" SearchFunc="@SearchProficiency"
+                                     MaxItems="null" Variant="Variant.Outlined" Error="@isError" ErrorText="@error" CoerceValue="true" CoerceText="true" />
+
+                    <MudSelect uid="input_skillLevel" Style="width:20rem;" T="ProficiencyLevel" Value="proficiencyLevel" Label="Stufe" Variant="Variant.Outlined" ValueChanged="OnProficiencyLvlChanged">
+                        @foreach (ProficiencyLevel profLevel in Enum.GetValues(typeof(ProficiencyLevel)))
+                        {
+                            <MudSelectItem Value="@profLevel">@profLevel</MudSelectItem>
+                        }
+                    </MudSelect>
+                    <MudFab uid="btn_addSkill" Color="Color.Info" StartIcon="@Icons.Material.Filled.Add" Size="Size.Small" @onclick="AddProficiency" />
+
+                
+
+                <MudItem xs="12">
+                    <MudPaper Class="d-flex gap-2" Elevation="0">
+                        <MudPaper Elevation="0" Class="d-flex flex-auto" Width="45%">
+                            <MudAutocomplete uid="input_skillName" T="string" Label="Kenntnis" Text="@newProficiency" Value="@newProficiency" ValueChanged="OnProficiencyChanged" SearchFunc="@SearchProficiency"
+                                             MaxItems="null" Variant="Variant.Outlined" Error="@isError" ErrorText="@error" CoerceText="true" CoerceValue="true" Style="" />
+                        </MudPaper>
+                        <MudPaper Elevation="0" Class="d-flex flex-auto" Width="45%" MaxWidth="45%">
+                            <MudSelect uid="input_skillLevel" Label="Stufe" Variant="Variant.Outlined" @bind-Value="proficiencyLevel">
+                                @foreach (ProficiencyLevel profLevel in Enum.GetValues(typeof(ProficiencyLevel)))
+                                {
+                                    <MudSelectItem uid=@($"skillLevel_{profLevel}") Value="@profLevel">@profLevel</MudSelectItem>
+                                }
+                            </MudSelect>
+                        </MudPaper>
+                        <MudPaper Elevation="0" Class="d-flex flex-auto" Width="10%" Style=" padding: .4rem 0 0 0;">
+                            <MudIconButton uid="btn_addSkill" Style="height:3.3rem; width:100%;" Variant="Variant.Filled" Color="Color.Secondary" Icon="@Icons.Material.Filled.Add" @onclick="AddNewProficiency"></MudIconButton>
+                        </MudPaper>
+                    </MudPaper>
+                </MudItem>
+
+
+
+
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+</MudContainer>
+@* <MudPaper Class="pa-8 ma-2" Elevation="3">
     <MudGrid>
         <MudItem xs="12">
             <MudText uid="page_title" Typo="Typo.h6">Kenntnisbasierte Mitarbeitersuche</MudText>
@@ -98,7 +146,7 @@
         </MudItem>
     </MudGrid>
 </MudPaper>
-
+ *@
 @code {
  
     List<ProficiencyBaseDTO> proficienciesDTO = new();
