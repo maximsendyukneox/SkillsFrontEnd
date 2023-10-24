@@ -6,17 +6,16 @@
 <MudDialogProvider />
 <MudSnackbarProvider />
 
-
 <MudLayout>
     <MudAppBar Elevation="1" Color="Color.Primary">
         <MudPaper Class="d-flex justify-center flex-grow-1 gap-12" Elevation="0" Style="background-color:inherit;">
             <MudImage Src=@(isDarkMode ? "./Images/logo/neoxLogoWhite.svg" : "./Images/logo/neoxLogoWhite.svg") Alt="neox Logo" Style="width:7rem;" @onclick="NavigateHome"></MudImage>
             <MudHidden Breakpoint="Breakpoint.SmAndDown">
-                <MudButton uid="navmenu_employees" Href="/" Variant="Variant.Filled" DisableElevation="true" StartIcon="@Icons.Material.Filled.Groups" Color="Color.Primary">Mitarbeiter</MudButton>
-                <MudButton Href="/search-byskill" Variant="Variant.Filled" DisableElevation="true" StartIcon="@Icons.Material.Filled.ManageSearch" Color="Color.Primary">Suche</MudButton>
-                <MudButton Variant="Variant.Filled" DisableElevation="true" StartIcon="@Icons.Material.Filled.GroupOff" Color="Color.Primary">Archiv</MudButton>
-                <MudButton Variant="Variant.Filled" DisableElevation="true" StartIcon="@Icons.Material.Filled.Logout" Color="Color.Primary">Logout</MudButton>
-                <MudIconButton @onclick="OnDarkModeActivated" Size="Size.Small" Color="Color.Info" Icon="@themeIcon" />
+                <MudButton Style="@(nav.Uri == nav.BaseUri+"employees"? activeLinkStyle : "")" uid="navmenu_employees" Href="/" Variant="Variant.Filled" DisableElevation="true" StartIcon="@Icons.Material.Filled.Groups" Color="Color.Primary">Mitarbeiter</MudButton>
+                <MudButton Style="@(nav.Uri == nav.BaseUri+"search-byskill"? activeLinkStyle : "")" Href="/search-byskill" Variant="Variant.Filled" DisableElevation="true" StartIcon="@Icons.Material.Filled.ManageSearch" Color="Color.Primary">Suche</MudButton>
+                <MudButton Style="@(nav.Uri == nav.BaseUri+"archive"? activeLinkStyle : "")" Variant="Variant.Filled" DisableElevation="true" StartIcon="@Icons.Material.Filled.GroupOff" Color="Color.Primary">Archiv</MudButton>
+                <MudButton Style="@(nav.Uri == nav.BaseUri+"logout"? activeLinkStyle : "")" Variant="Variant.Filled" DisableElevation="true" StartIcon="@Icons.Material.Filled.Logout" Color="Color.Primary">Logout</MudButton>
+                <MudIconButton @onclick="OnDarkModeActivated" Size="Size.Small" Color="Color.Info" Icon="@themeIcon"/>
             </MudHidden>
         </MudPaper>
         <MudHidden Breakpoint="Breakpoint.MdAndUp">
@@ -48,7 +47,7 @@
     bool isDarkMode;
     string themeIcon = Icons.Material.Filled.DarkMode;
     public string mobileMenufontColor = "color: black;";
-
+    public string activeLinkStyle = "border-bottom: 2px solid #029CE3;border-radius:0";
 
     MudTheme neoxTheme = new MudTheme()
     {
