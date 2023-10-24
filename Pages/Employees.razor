@@ -102,11 +102,14 @@
 
     private bool FilterFunc(Employee employee, string searchString)
     {
+        string name = employee.FirstName + " " + employee.LastName;
         if (string.IsNullOrWhiteSpace(searchString))
             return true;
         if (employee.FirstName.Contains(searchString, StringComparison.OrdinalIgnoreCase))
             return true;
         if (employee.LastName.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (name.Contains(searchString, StringComparison.OrdinalIgnoreCase))
             return true;
         return false;
     }
