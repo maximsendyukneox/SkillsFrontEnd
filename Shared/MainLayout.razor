@@ -11,9 +11,9 @@
         <MudPaper Class="d-flex justify-center flex-grow-1 gap-12" Elevation="0" Style="background-color:inherit;">
             <MudImage Src=@(isDarkMode ? "./Images/logo/neoxLogoWhite.svg" : "./Images/logo/neoxLogoWhite.svg") Alt="neox Logo" Style="width:7rem;" @onclick="NavigateHome"></MudImage>
             <MudHidden Breakpoint="Breakpoint.SmAndDown">
-                <MudButton Style="@(nav.Uri == nav.BaseUri+"employees"? activeLinkStyle : "")" uid="navmenu_employees" Href="/" Variant="Variant.Filled" DisableElevation="true" StartIcon="@Icons.Material.Filled.Groups" Color="Color.Primary">Mitarbeiter</MudButton>
+                <MudButton Style="@(nav.Uri == nav.BaseUri+"employees"? activeLinkStyle : "")" uid="navmenu_employees" Href="/employees" Variant="Variant.Filled" DisableElevation="true" StartIcon="@Icons.Material.Filled.Groups" Color="Color.Primary">Mitarbeiter</MudButton>
                 <MudButton Style="@(nav.Uri == nav.BaseUri+"search-byskill"? activeLinkStyle : "")" Href="/search-byskill" Variant="Variant.Filled" DisableElevation="true" StartIcon="@Icons.Material.Filled.ManageSearch" Color="Color.Primary">Suche</MudButton>
-                <MudButton Style="@(nav.Uri == nav.BaseUri+"archive"? activeLinkStyle : "")" Variant="Variant.Filled" DisableElevation="true" StartIcon="@Icons.Material.Filled.GroupOff" Color="Color.Primary">Archiv</MudButton>
+                <MudButton Style="@(nav.Uri == nav.BaseUri+"archive"? activeLinkStyle : "")" Href="/archive" Variant="Variant.Filled" DisableElevation="true" StartIcon="@Icons.Material.Filled.GroupOff" Color="Color.Primary">Archiv</MudButton>
                 <MudButton Style="@(nav.Uri == nav.BaseUri+"logout"? activeLinkStyle : "")" Variant="Variant.Filled" DisableElevation="true" StartIcon="@Icons.Material.Filled.Logout" Color="Color.Primary">Logout</MudButton>
                 <MudIconButton @onclick="OnDarkModeActivated" Size="Size.Small" Color="Color.Info" Icon="@themeIcon"/>
             </MudHidden>
@@ -30,7 +30,7 @@
             <MudNavMenu Color="Color.Secondary" Style="@mobileMenufontColor">
                 <MudNavLink Href="/employees" Icon="@Icons.Material.Filled.Groups" Match="NavLinkMatch.All">Mitarbeiter</MudNavLink>
                 <MudNavLink Href="/search-byskill" Icon="@Icons.Material.Filled.ManageSearch" Match="NavLinkMatch.All">Suche</MudNavLink>
-                <MudNavLink Icon="@Icons.Material.Filled.GroupOff" Match="NavLinkMatch.All">Archiv</MudNavLink>
+                <MudNavLink Href ="/archive" Icon="@Icons.Material.Filled.GroupOff" Match="NavLinkMatch.All">Archiv</MudNavLink>
                 <MudNavLink Icon="@Icons.Material.Filled.Logout" Match="NavLinkMatch.All">Logout</MudNavLink>
                 <MudNavLink Icon="@themeIcon" @onclick="OnDarkModeActivated" Match="NavLinkMatch.All"></MudNavLink>
             </MudNavMenu>
@@ -47,7 +47,7 @@
     bool isDarkMode;
     string themeIcon = Icons.Material.Filled.DarkMode;
     public string mobileMenufontColor = "color: black;";
-    public string activeLinkStyle = "border-bottom: 2px solid #029CE3;border-radius:0";
+    public string activeLinkStyle = "border-bottom: 2px solid #0072C6;border-radius:0";
 
     MudTheme neoxTheme = new MudTheme()
     {

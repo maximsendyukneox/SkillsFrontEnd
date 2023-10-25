@@ -14,7 +14,7 @@ namespace SkillsFrontEnd
         [RegularExpression(@"^[a-zA-ZöäüÖÄÜ]+([ -][a-zA-ZöäüÖÄÜ]+)?$", ErrorMessage = "Keine Sonderzeichen oder Zahlen erlaubt")]
         public string LastName { get; set; }
 
-        [Required(ErrorMessage = "Bitte ein gültiges Geburtsdatum eingeben")]
+        [Required(ErrorMessage = "Kein valides Datumsformat")]
         public DateTime? Date { get; set; }
     }
 }
