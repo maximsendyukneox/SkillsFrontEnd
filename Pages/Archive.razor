@@ -47,7 +47,7 @@
                     <MudTd uid=@($"table_birthdayOf_{context.FirstName}_{context.LastName}_{context.Birthday.ToShortDateString()}") DataLabel="Geburtsdatum">@context.Birthday.ToShortDateString()</MudTd>
                     <MudTd uid="btn_restoreEmployee" DataLabel="Aktion">
                         <MudTooltip Text="Wiederherstellen">
-                            <MudIconButton uid="@($"btn_restoreEmployee_{context.FirstName}_{context.LastName}_{context.Birthday.ToShortDateString()}")" @onclick="@(()=>RestoreEmployee(context))" Size="Size.Medium" Color="Color.Secondary" Icon="@Icons.Material.Filled.PersonAdd" />
+                            <MudIconButton uid="@($"btn_restoreEmployee_{context.FirstName}_{context.LastName}_{context.Birthday.ToShortDateString()}")" @onclick="@(()=>OpenRestoreEmployeeDialog(context))" Size="Size.Medium" Color="Color.Secondary" Icon="@Icons.Material.Filled.Refresh" />
                         </MudTooltip>                      
                     </MudTd>
                 </RowTemplate>
@@ -59,23 +59,6 @@
     </MudGrid>
 </MudContainer>
 
-<MudMessageBox uid="msgBox" @ref="restoreEmployeeMessageBox">
-    <TitleContent>
-        <MudStack Row="true" Justify="Justify.FlexStart" AlignItems="AlignItems.Center">
-            <MudIcon Icon="@Icons.Material.Filled.Refresh" />
-            <MudText Typo="Typo.h6">Mitarbeiter wiederherstellen</MudText>
-        </MudStack>
-    </TitleContent>
-    <MessageContent>
-        <MudText uid="msgBox_message">Diesen Mitarbeiter wiederherstellen?</MudText>
-    </MessageContent>
-    <YesButton>
-        <MudButton uid="msgBox_btnRestore" Variant="Variant.Filled" Color="Color.Secondary">Wiederherstellen</MudButton>
-    </YesButton>
-    <NoButton>
-        <MudButton uid="msgBox_btnCancel" Variant="Variant.Outlined" Color="Color.Secondary">Abbrechen</MudButton>
-    </NoButton>
-</MudMessageBox>
 
 
 
@@ -87,7 +70,6 @@
     private EmployeeDeleted selectedEmployee = null;
     private List<EmployeeDeleted> employees = new List<EmployeeDeleted>();
     private bool loading = true;
-    private MudMessageBox restoreEmployeeMessageBox { get; set; }
     private string ErrorText { get; set; } = String.Empty;
     private bool isException = false;
 
@@ -106,26 +88,15 @@
         }
     }
 
-    private async Task RestoreEmployee (EmployeeDeleted employeeToRestore)
+    private async Task OpenRestoreEmployeeDialog(EmployeeDeleted employeeToRestore)
     {
-        bool? result = await restoreEmployeeMessageBox.Show();
-        if (result == false || result == null)
-            return;
-        else
+        var options = new DialogOptions { CloseOnEscapeKey = true, DisableBackdropClick = true };
+        var parameters = new DialogParameters { ["Id"] = employeeToRestore.Id.ToString() };
+        var dialog = DialogService.Show<RestoreEmployee>("Mitarbeiter wiederherstellen", parameters, options);
+        var result = await dialog.Result;
+        if (!result.Canceled)
         {
-            try
-            {
-              var restoredEmployee = await Program.client.RestoreEmployeeAsync(employeeToRestore.Id);
-            }
-            catch (Exception ex)
-            {
-                isException = true;
-                ErrorText = ex.Message;
-                StateHasChanged();
-                await Task.Delay(3000);
-                isException = false;
-                return;
-            }
+            await OnInitializedAsync();
         }
     }
 

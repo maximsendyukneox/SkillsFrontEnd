@@ -1,0 +1,102 @@
+﻿@using SkillsDatabase
+@using System
+@using System.Threading;
+
+<MudDialog Class="pa-4">
+    <DialogContent>
+        <MudGrid>
+            <MudItem xs="12">
+                <EditForm EditContext="@editContext">
+                    <DataAnnotationsValidator />
+                    <MudGrid Spacing="1">
+                        <MudItem xs="12">
+                            <MudTextField uid="input_firstName" ReadOnly @bind-Value="model.FirstName" For="@(()=> model.FirstName)" Label="Vorname" Variant="Variant.Outlined"></MudTextField>
+                        </MudItem>
+                        <MudItem xs="12">
+                             <MudTextField uid="input_lastName" ReadOnly @bind-Value="model.LastName" For="@(()=> model.LastName)" Label="Nachname" Variant="Variant.Outlined"></MudTextField>
+                        </MudItem>
+                        <MudItem xs="12">
+                             <MudDatePicker uid="input_birthday" ReadOnly DateFormat="dd.MM.yyyy" Color="Color.Secondary" For="@(()=> model.Date)" Label="Geburtsdatum" @bind-Date="model.Date" MaxDate="DateTime.Now" Variant="Variant.Outlined" Editable="false" />
+                        </MudItem>
+                        <MudItem xs="12">
+                            <MudTable Items="@proficienciesDTO" Outlined="true" Style="padding:0;margin-top:1rem;">
+                                <HeaderContent>
+                                    <MudTh uid="table_column_skillName" Style="padding:10px 10px 10px 10px;">Kenntnis</MudTh>
+                                    <MudTh uid="table_column_skillLevel" Style="padding:10px 10px 10px 10px;">Stufe</MudTh>
+                                </HeaderContent>
+                                <RowTemplate Context="ctx">
+                                    <MudTd uid=@($"table_skillName_{ctx.SkillName}") Style="padding:10px 10px 10px 10px;" DataLabel="Kenntnis">@ctx.SkillName</MudTd>
+                                    <MudTd uid=@($"table_skillLevel_{ctx.SkillName}_{ctx.SkillLevel}") Style="padding:10px 10px 10px 10px;" DataLabel="Stufe">@ctx.SkillLevel</MudTd>                
+                                </RowTemplate>
+                            </MudTable>
+                        </MudItem>
+                        <MudItem xs="12">
+                            <MudStack Row="true" Style="margin-top:1rem;">
+                                <MudButton uid="btn_restore" Style="width:10rem;" @onclick="RestoreSelectedEmployee" Variant="Variant.Filled" Color="Color.Secondary" Size="Size.Medium">Wiederherstellen</MudButton>
+                                <MudButton uid="btn_cancel" Style="width:8rem;" @onclick="Cancel" Variant="Variant.Outlined" Color="Color.Secondary" Size="Size.Medium">Abbrechen</MudButton>
+                            </MudStack>
+                        </MudItem>
+                        <MudItem xs="12">                  
+                            @if (isException)
+                            {
+                                <MudAlert Severity="Severity.Error">@ErrorText</MudAlert>
+                            }
+                        </MudItem>
+                    </MudGrid>
+                </EditForm>
+            </MudItem>
+        </MudGrid>
+    </DialogContent>
+</MudDialog>
+
+
+@code {
+    private List<ProficiencyBaseDTO> proficienciesDTO;
+    private bool isException = false;
+    private string ErrorText { get; set; } = String.Empty;
+    private SaveEmployeeForm model = new SaveEmployeeForm();
+    private List<ProficiencyDeleted> employeeProficiencies = new();
+    private EmployeeDeleted employeeToRestore;
+    private EditContext editContext { get; set; }
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+    [Parameter] public string Id { get; set; } = "";
+
+    protected async override Task OnInitializedAsync()
+    {
+        editContext = new EditContext(model);
+        proficienciesDTO = new();
+        employeeToRestore = await Program.client.GetDeletedEmployeeAsync(Convert.ToInt32(Id));
+        model.FirstName = employeeToRestore.FirstName;
+        model.LastName = employeeToRestore.LastName;
+        model.Date = employeeToRestore.Birthday;
+
+        employeeProficiencies = await Program.client.GetDeletedProficienciesAsync(employeeToRestore.Id);
+
+        foreach (var p in employeeProficiencies)
+        {
+            proficienciesDTO.Add(new ProficiencyBaseDTO(p.Skill.Name, p.Level));
+        }
+        await base.OnInitializedAsync();
+    }
+
+    private async Task RestoreSelectedEmployee()
+    {
+        try
+        {
+            await Program.client.RestoreEmployeeAsync(int.Parse(Id));
+        }
+        catch (Exception ex)
+        {
+            isException = true;
+            ErrorText = ex.Message;
+            StateHasChanged();
+            return;
+        }
+        MudDialog.Close(DialogResult.Ok(true));
+    }
+
+    private void Cancel()
+    {
+        MudDialog.Cancel();
+    }
+}
