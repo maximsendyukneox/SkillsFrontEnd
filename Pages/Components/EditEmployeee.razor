@@ -175,17 +175,20 @@
 
     private async Task SaveChanges(EditContext context)
     {
-        try
+        if (!(employee.FirstName == model.FirstName && employee.LastName == model.LastName)) // no change was done by user
         {
-            await Program.client.UpdateEmployeeAsync(new EmployeeDTO(model.FirstName, model.LastName, model.Date!.Value.ToShortDateString(), Convert.ToInt32(Id)));
-        }
-        catch (Exception ex)
-        {
-            isException = true;
-            ErrorText = ex.Message;
-            StateHasChanged();
-            return;
-        }
+            try
+            {
+                await Program.client.UpdateEmployeeAsync(new EmployeeDTO(model.FirstName, model.LastName, model.Date!.Value.ToShortDateString(), Convert.ToInt32(Id)));
+            }
+            catch (Exception ex)
+            {
+                isException = true;
+                ErrorText = ex.Message;
+                StateHasChanged();
+                return;
+            }
+        } 
         foreach (var proficiency in proficienciesToAdd)
         {
             await Program.client.CreateProficiencyAsync
