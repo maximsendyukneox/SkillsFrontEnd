@@ -60,11 +60,7 @@
                                 <MudButton uid="btn_cancel" Style="width:8rem;" OnClick="Cancel" Variant="Variant.Outlined" Color="Color.Secondary" Size="Size.Medium">Abbrechen</MudButton>
                             </MudStack>
                         </MudItem>
-                        <MudItem xs="12">
-                            @* @if (isSuccess)
-                            {
-                                <MudAlert Style="margin-top: 1rem;" Severity="Severity.Success">Speichern erfolgreich</MudAlert>
-                            } *@
+                        <MudItem xs="12">                         
                             @if (isException)
                             {
                                 <MudAlert Severity="Severity.Error">@ErrorText</MudAlert>
@@ -146,7 +142,7 @@
             return;
         };
 
-        proficienciesDTO.Add(new(newProficiency, proficiencyLevel));
+        proficienciesDTO.Add(new(newProficiency.Trim(), proficiencyLevel));
         newProficiency = string.Empty;
         isError = false;
     }

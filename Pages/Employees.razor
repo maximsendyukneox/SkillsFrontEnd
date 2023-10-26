@@ -29,7 +29,7 @@
         <MudItem xs="12" Style="height: 100%;">
             <MudTable Items="@employees" Class="mud-theme-surface" RowsPerPage="25" Elevation="4" Loading="@loading" LoadingProgressColor="Color.Secondary" Dense="true" Filter="new Func<Employee,bool>(FilterFunc1)" @bind-SelectedItem="selectedEmployee">
                 <ToolBarContent>
-                    <MudTextField uid="table_searchField" @bind-Value="searchString1" Immediate="true" Placeholder="Suchen" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+                    <MudTextField uid="table_searchField" @bind-Value="searchString1" Immediate="true" Placeholder="Suchen" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium"></MudTextField>
                     <MudSpacer />
                 </ToolBarContent>
                 <HeaderContent>

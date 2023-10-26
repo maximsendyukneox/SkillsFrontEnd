@@ -7,7 +7,6 @@
         <MudGrid>
             <MudItem xs="12">
                 <EditForm EditContext="@editContext">
-                    <DataAnnotationsValidator />
                     <MudGrid Spacing="1">
                         <MudItem xs="12">
                             <MudTextField uid="input_firstName" ReadOnly @bind-Value="model.FirstName" For="@(()=> model.FirstName)" Label="Vorname" Variant="Variant.Outlined"></MudTextField>
@@ -55,7 +54,7 @@
     private bool isException = false;
     private string ErrorText { get; set; } = String.Empty;
     private SaveEmployeeForm model = new SaveEmployeeForm();
-    private List<ProficiencyDeleted> employeeProficiencies = new();
+    private List<ProficiencyDeleted> employeeProficiencies;
     private EmployeeDeleted employeeToRestore;
     private EditContext editContext { get; set; }
     [CascadingParameter] MudDialogInstance MudDialog { get; set; }

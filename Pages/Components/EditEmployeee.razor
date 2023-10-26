@@ -130,8 +130,8 @@
             return;
         };
 
-        proficienciesDTO.Add(new(newProficiency, proficiencyLevel));
-        proficienciesToAdd.Add(new(newProficiency, proficiencyLevel));
+        proficienciesDTO.Add(new(newProficiency.Trim(), proficiencyLevel));
+        proficienciesToAdd.Add(new(newProficiency.Trim(), proficiencyLevel));
         newProficiency = string.Empty;
     }
 
