@@ -1,6 +1,7 @@
 using SkillsBackend.Client;
 using SkillsDatabase;
 using MudBlazor.Services;
+using System.Globalization;
 
 namespace SkillsFrontEnd;
 
@@ -11,7 +12,10 @@ public class Program
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor.
     public static void Main(string[] args)
     {
-        
+
+        CultureInfo germanCulture = new CultureInfo("de-DE");
+        CultureInfo.DefaultThreadCurrentCulture = germanCulture;
+        CultureInfo.DefaultThreadCurrentUICulture = germanCulture;
         client = new SkillsClient(Constants.API_BASE_URI, "Integration_Test");
         var builder = WebApplication.CreateBuilder(args);
       
