@@ -5,11 +5,14 @@
 	<RazorLanguageVersion>7</RazorLanguageVersion>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+	<ServiceWorkerAssetsManifest>service-worker-assets.js</ServiceWorkerAssetsManifest>
   </PropertyGroup>
 
   <ItemGroup>
     <Content Remove="Shared\NavMenu.razor" />
     <Content Remove="Shared\SurveyPrompt.razor" />
+	  <ServiceWorker Include="wwwroot\service-worker.js"
+					 PublishedContent="wwwroot\service-worker.published.js" />
   </ItemGroup>
 
   <ItemGroup>
@@ -31,6 +34,10 @@
 
   <ItemGroup>
     <Folder Include="Images\Icons\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="wwwroot\service-worker.js" />
   </ItemGroup>
 
 </Project>
