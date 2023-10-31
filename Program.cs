@@ -13,9 +13,6 @@ public class Program
     public static void Main(string[] args)
     {
 
-        CultureInfo germanCulture = new CultureInfo("de-DE");
-        CultureInfo.DefaultThreadCurrentCulture = germanCulture;
-        CultureInfo.DefaultThreadCurrentUICulture = germanCulture;
         client = new SkillsClient(Constants.API_BASE_URI, "Integration_Test");
         var builder = WebApplication.CreateBuilder(args);
       

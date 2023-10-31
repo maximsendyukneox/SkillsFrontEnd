@@ -1,6 +1,7 @@
 ﻿@page "/search-byskill"
 @using SkillsDatabase
 @using System.Linq
+@using System.Globalization
 @using System.Collections.Generic
 
 <MudContainer MaxWidth="MaxWidth.Large">
@@ -79,7 +80,7 @@
                 <RowTemplate>
                     <MudTd Style="vertical-align:top" uid=@($"table_firstName_{@context.FirstName}") DataLabel="Vorname">@context.FirstName</MudTd>
                     <MudTd Style="vertical-align:top" uid=@($"table_lastName_{@context.LastName}") DataLabel="Nachname">@context.LastName</MudTd>
-                    <MudTd Style="vertical-align:top" uid=@($"table_birthday_{@context.FirstName}") DataLabel="Geburtsdatum">@context.Birthday.ToShortDateString()</MudTd>
+                    <MudTd Style="vertical-align:top" uid=@($"table_birthday_{@context.FirstName}") DataLabel="Geburtsdatum">@context.Birthday.ToString("d",culture)</MudTd>
                     <MudTd DataLabel="Kenntnis">
                         @foreach (var skill in context.Skills)
                         {
@@ -123,6 +124,7 @@
     private bool isNoRecordsContentDisplayed = false;
     private bool hasSearchFoundEmployees = true;
     List<EmployeeTableData> tableData = new List<EmployeeTableData>();
+    private CultureInfo culture = new CultureInfo("de-DE");
 
     protected override async Task OnInitializedAsync()
     {

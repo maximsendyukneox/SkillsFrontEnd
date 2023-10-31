@@ -6,7 +6,31 @@
     <NotFound>
         <PageTitle>Not found</PageTitle>
         <LayoutView Layout="@typeof(MainLayout)">
-            <p role="alert">Sorry, there's nothing at this address.</p>
+
+            <MudPaper Elevation="0" Height="100vh" Class="d-flex justify-center mud-theme-background">
+                <MudStack Row="false" Style="height:20rem;margin-top:7rem;">
+                    <MudPaper Elevation="0" Class="d-flex justify-center align-center">
+                        <MudText Class="typo-small" Typo="Typo.h2">404 Not Found</MudText>
+                    </MudPaper>
+                    <MudPaper Elevation="0" Class="d-flex justify-center align-center">
+                        <MudImage Src="https://i.gifer.com/yH.gif" Class="img-small" ObjectFit="ObjectFit.Cover"></MudImage>
+                    </MudPaper>
+                </MudStack>
+            </MudPaper>
         </LayoutView>
     </NotFound>
 </Router>
+
+<style>
+    @@media only screen and (max-width: 550px) {
+
+        .img-small {
+            width: 300px;
+            height: 400px;
+        }
+
+        .typo-small {
+            font-size: 2rem;
+        }
+    }
+</style>

@@ -5,6 +5,7 @@
 @using SkillsBackend.Client
 @using Microsoft.EntityFrameworkCore
 @using Components
+@using System.Globalization
 @inject NavigationManager nav
 @inject IDialogService DialogService
 
@@ -39,15 +40,15 @@
                     <MudTh uid="table_column_action">Aktion</MudTh>
                 </HeaderContent>
                 <RowTemplate>
-                    <MudTd uid=@($"table_firstNameOf_{context.FirstName}_{context.LastName}_{context.Birthday.ToShortDateString()}") DataLabel="Vorname">@context.FirstName</MudTd>
-                    <MudTd uid=@($"table_lastNameOf_{context.FirstName}_{context.LastName}_{context.Birthday.ToShortDateString()}") DataLabel="Nachname">@context.LastName</MudTd>
-                    <MudTd uid=@($"table_birthdayOf_{context.FirstName}_{context.LastName}_{context.Birthday.ToShortDateString()}") DataLabel="Geburtsdatum">@context.Birthday.ToShortDateString()</MudTd>
+                    <MudTd uid=@($"table_firstNameOf_{context.FirstName}_{context.LastName}_{context.Birthday.ToString("d",culture)}") DataLabel="Vorname">@context.FirstName</MudTd>
+                    <MudTd uid=@($"table_lastNameOf_{context.FirstName}_{context.LastName}_{context.Birthday.ToString("d",culture)}") DataLabel="Nachname">@context.LastName</MudTd>
+                    <MudTd uid=@($"table_birthdayOf_{context.FirstName}_{context.LastName}_{context.Birthday.ToString("d",culture)}") DataLabel="Geburtsdatum">@context.Birthday.ToString("d",culture)</MudTd>
                     <MudTd uid="btn_editEmployee" DataLabel="Aktion">
                         <MudTooltip Text="Bearbeiten">
-                            <MudIconButton uid="@($"btn_editEmployee_{context.FirstName}_{context.LastName}_{context.Birthday.ToShortDateString()}")" @onclick="@(()=>OpenEditEmployeeDialog(context))" Size="Size.Medium" Color="Color.Secondary" Icon="@Icons.Material.Filled.EditNote" />
+                            <MudIconButton uid="@($"btn_editEmployee_{context.FirstName}_{context.LastName}_{context.Birthday.ToString("d",culture)}")" @onclick="@(()=>OpenEditEmployeeDialog(context))" Size="Size.Medium" Color="Color.Secondary" Icon="@Icons.Material.Filled.EditNote" />
                         </MudTooltip>
                         <MudTooltip Text="Löschen">
-                            <MudIconButton uid="@($"btn_deleteEmployee_{context.FirstName}_{context.LastName}_{context.Birthday.ToShortDateString()}")" @onclick="@(()=>DeleteEmployee(context))" Size="Size.Small" Color="Color.Error" Icon="@Icons.Material.Filled.DeleteForever" />
+                            <MudIconButton uid="@($"btn_deleteEmployee_{context.FirstName}_{context.LastName}_{context.Birthday.ToString("d",culture)}")" @onclick="@(()=>DeleteEmployee(context))" Size="Size.Small" Color="Color.Error" Icon="@Icons.Material.Filled.DeleteForever" />
                         </MudTooltip>
                     </MudTd>
                 </RowTemplate>
@@ -83,6 +84,7 @@
     private List<Employee> employees = new List<Employee>();
     private bool loading = true;
     private MudMessageBox deleteMessageBox { get; set; }
+    private CultureInfo culture = new CultureInfo("de-DE");
 
     protected override async Task OnInitializedAsync()
     {

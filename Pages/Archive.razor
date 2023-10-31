@@ -6,6 +6,7 @@
 @using SkillsBackend.Client
 @using Microsoft.EntityFrameworkCore
 @using Components
+@using System.Globalization
 @inject NavigationManager nav
 @inject IDialogService DialogService
 
@@ -42,12 +43,12 @@
                     <MudTh uid="table_column_action">Aktion</MudTh>
                 </HeaderContent>
                 <RowTemplate>
-                    <MudTd uid=@($"table_firstNameOf_{context.FirstName}_{context.LastName}_{context.Birthday.ToShortDateString()}") DataLabel="Vorname">@context.FirstName</MudTd>
-                    <MudTd uid=@($"table_lastNameOf_{context.FirstName}_{context.LastName}_{context.Birthday.ToShortDateString()}") DataLabel="Nachname">@context.LastName</MudTd>
-                    <MudTd uid=@($"table_birthdayOf_{context.FirstName}_{context.LastName}_{context.Birthday.ToShortDateString()}") DataLabel="Geburtsdatum">@context.Birthday.ToShortDateString()</MudTd>
+                    <MudTd uid=@($"table_firstNameOf_{context.FirstName}_{context.LastName}_{context.Birthday.ToString("d",culture)}") DataLabel="Vorname">@context.FirstName</MudTd>
+                    <MudTd uid=@($"table_lastNameOf_{context.FirstName}_{context.LastName}_{context.Birthday.ToString("d",culture)}") DataLabel="Nachname">@context.LastName</MudTd>
+                    <MudTd uid=@($"table_birthdayOf_{context.FirstName}_{context.LastName}_{context.Birthday.ToString("d",culture)}") DataLabel="Geburtsdatum">@context.Birthday.ToString("d",culture)</MudTd>
                     <MudTd uid="btn_restoreEmployee" DataLabel="Aktion">
                         <MudTooltip Text="Wiederherstellen">
-                            <MudIconButton uid="@($"btn_restoreEmployee_{context.FirstName}_{context.LastName}_{context.Birthday.ToShortDateString()}")" @onclick="@(()=>OpenRestoreEmployeeDialog(context))" Size="Size.Medium" Color="Color.Secondary" Icon="@Icons.Material.Filled.Refresh" />
+                            <MudIconButton uid="@($"btn_restoreEmployee_{context.FirstName}_{context.LastName}_{context.Birthday.ToString("d",culture)}")" @onclick="@(()=>OpenRestoreEmployeeDialog(context))" Size="Size.Medium" Color="Color.Secondary" Icon="@Icons.Material.Filled.Refresh" />
                         </MudTooltip>                      
                     </MudTd>
                 </RowTemplate>
@@ -72,6 +73,7 @@
     private bool loading = true;
     private string ErrorText { get; set; } = String.Empty;
     private bool isException = false;
+    private CultureInfo culture = new CultureInfo("de-DE");
 
 
     protected override async Task OnInitializedAsync()
