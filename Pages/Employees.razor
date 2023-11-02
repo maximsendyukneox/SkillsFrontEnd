@@ -1,9 +1,8 @@
 ﻿@page "/employees"
 <PageTitle>neox AG Mitarbeiterübersicht</PageTitle>
 
-@using SkillsDatabase
+@using SkillsBackend.Model
 @using SkillsBackend.Client
-@using Microsoft.EntityFrameworkCore
 @using Components
 @using System.Globalization
 @inject NavigationManager nav
@@ -91,7 +90,7 @@
         await base.OnInitializedAsync();
         try
         {
-            employees = await Program.client.GetEmployeesAsync();
+            employees = await Program.Client.GetEmployeesAsync();
             loading = false;
         }
         catch (InvalidOperationException ex)
@@ -151,7 +150,7 @@
             return;
         else
         {
-            await Program.client.DeleteEmployeeAsync(employee.Id);
+            await Program.Client.DeleteEmployeeAsync(employee.Id);
         }
         await OnInitializedAsync();
     }

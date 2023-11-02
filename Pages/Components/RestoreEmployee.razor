@@ -1,4 +1,4 @@
-﻿@using SkillsDatabase
+﻿@using SkillsBackend.Model
 @using System
 @using System.Threading;
 
@@ -50,7 +50,7 @@
 
 
 @code {
-    private List<ProficiencyBaseDTO> proficienciesDTO;
+    private List<ProficiencyDTO> proficienciesDTO;
     private bool isException = false;
     private string ErrorText { get; set; } = String.Empty;
     private SaveEmployeeForm model = new SaveEmployeeForm();
@@ -64,16 +64,16 @@
     {
         editContext = new EditContext(model);
         proficienciesDTO = new();
-        employeeToRestore = await Program.client.GetDeletedEmployeeAsync(Convert.ToInt32(Id));
+        employeeToRestore = await Program.Client.GetDeletedEmployeeAsync(Convert.ToInt32(Id));
         model.FirstName = employeeToRestore.FirstName;
         model.LastName = employeeToRestore.LastName;
         model.Date = employeeToRestore.Birthday;
 
-        employeeProficiencies = await Program.client.GetDeletedProficienciesAsync(employeeToRestore.Id);
+        employeeProficiencies = await Program.Client.GetDeletedProficienciesAsync(employeeToRestore.Id);
 
         foreach (var p in employeeProficiencies)
         {
-            proficienciesDTO.Add(new ProficiencyBaseDTO(p.Skill.Name, p.Level));
+            proficienciesDTO.Add(new ProficiencyDTO(p.Skill.Name, p.Level));
         }
         await base.OnInitializedAsync();
     }
@@ -82,7 +82,7 @@
     {
         try
         {
-            await Program.client.RestoreEmployeeAsync(int.Parse(Id));
+            await Program.Client.RestoreEmployeeAsync(int.Parse(Id));
         }
         catch (Exception ex)
         {

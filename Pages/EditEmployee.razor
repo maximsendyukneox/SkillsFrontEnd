@@ -1,7 +1,6 @@
 ﻿@page "/edit-employee/{Id}"
 @inject NavigationManager nav
-@using SkillsDatabase
-@using Microsoft.Data.SqlClient
+@using SkillsBackend.Model
 @using System.Linq
 
 
@@ -80,8 +79,8 @@
 </MudMessageBox>
 
 @code {
- 
-    private List<ProficiencyBaseDTO> proficienciesDTO;
+
+    private List<ProficiencyDTO> proficienciesDTO;
     private string newProficiency = String.Empty;
     private ProficiencyLevel proficiencyLevel = ProficiencyLevel.Basic;
     private bool isError = false;
@@ -93,7 +92,7 @@
     private List<Proficiency> employeeProficiencies = new();
     private Employee employee;
     private List<string> skills = new();
-    private List<ProficiencyBaseDTO> proficienciesToAdd = new();
+    private List<ProficiencyDTO> proficienciesToAdd = new();
     private List<Proficiency> proficienciesToDelete = new();
     private MudMessageBox deleteMessageBox { get; set; }
 
@@ -103,18 +102,18 @@
     protected async override Task OnInitializedAsync()
     {
         proficienciesDTO = new();
-        employee = await Program.client.GetEmployeeAsync(Convert.ToInt32(Id));
+        employee = await Program.Client.GetEmployeeAsync(Convert.ToInt32(Id));
         model.FirstName = employee.FirstName;
         model.LastName = employee.LastName;
         model.Date = employee.Birthday;
 
-        employeeProficiencies = await Program.client.GetProficiencyAsync(employee.Id);
+        employeeProficiencies = await Program.Client.GetProficiencyAsync(employee.Id);
 
-        skills = await Program.client.GetSkillsAsync();
+        skills = await Program.Client.GetSkillsAsync();
 
         foreach (var p in employeeProficiencies)
         {
-            proficienciesDTO.Add(new ProficiencyBaseDTO(p.Skill.Name, p.Level));
+            proficienciesDTO.Add(new ProficiencyDTO(p.Skill.Name, p.Level));
         }
         await base.OnInitializedAsync();
     }
@@ -136,7 +135,7 @@
         newProficiency = string.Empty;
     }
 
-    private void RemoveProficiency(ProficiencyBaseDTO rowData)
+    private void RemoveProficiency(ProficiencyDTO rowData)
     {
         proficienciesDTO.RemoveAll(p => p.SkillName == rowData.SkillName && p.SkillLevel == rowData.SkillLevel);
         proficienciesToAdd.RemoveAll(p => p.SkillName == rowData.SkillName && p.SkillLevel == rowData.SkillLevel);
@@ -154,7 +153,7 @@
             return;
         else
         {
-            await Program.client.DeleteEmployeeAsync(employee.Id);
+            await Program.Client.DeleteEmployeeAsync(employee.Id);
             nav.NavigateTo("/search-employee");
         }
         StateHasChanged();
@@ -164,7 +163,7 @@
     {  
         try
         {                    
-            await Program.client.UpdateEmployeeAsync(new EmployeeDTO(model.FirstName,model.LastName,model.Date!.Value.ToShortDateString(), Convert.ToInt32(Id)));
+            await Program.Client.UpdateEmployeeAsync(new EmployeeDTO(model.FirstName, model.LastName, model.Date!.Value.ToShortDateString()) { Id = Convert.ToInt32(Id) });
         }
         catch (ArgumentException ex)
         {
@@ -174,19 +173,18 @@
         }
         foreach (var proficiency in proficienciesToAdd)
         {
-            await Program.client.CreateProficiencyAsync
+            await Program.Client.CreateProficiencyAsync
             (
-                new SkillsBackend.ProficiencyBaseDTO_withOwner
+                new ProficiencyDTO
                 (
                     proficiency.SkillName,
-                    proficiency.SkillLevel,
-                    employee.Id
-                )
+                    proficiency.SkillLevel
+                ) { OwnerId = employee.Id }
             );
         }
         foreach (var proficiency in proficienciesToDelete)
         {
-            await Program.client.DeleteProficiencyAsync(proficiency.Id);
+            await Program.Client.DeleteProficiencyAsync(proficiency.Id);
         }
         await OnInitializedAsync();
         isSuccess = true;

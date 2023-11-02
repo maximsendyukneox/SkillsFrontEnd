@@ -1,4 +1,4 @@
-﻿using SkillsDatabase;
+﻿using SkillsBackend.Model;
 
 namespace SkillsFrontEnd
 {

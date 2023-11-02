@@ -1,5 +1,5 @@
 ﻿@page "/search-byskill"
-@using SkillsDatabase
+@using SkillsBackend.Model
 @using System.Linq
 @using System.Globalization
 @using System.Collections.Generic
@@ -110,7 +110,7 @@
 
 @code {
  
-    List<ProficiencyBaseDTO> proficienciesDTO = new();
+    List<ProficiencyDTO> proficienciesDTO = new();
     List<Proficiency> searchResult = new List<Proficiency>();
     private ProficiencyLevel proficiencyLevel = ProficiencyLevel.Basic;
     private string proficiency = "";
@@ -131,7 +131,7 @@
         await base.OnInitializedAsync();
         try
         {
-            proficiencies = await Program.client.GetSkillsAsync();
+            proficiencies = await Program.Client.GetSkillsAsync();
         }
         catch (InvalidOperationException ex)
         {
@@ -167,12 +167,12 @@
         isError = false;
     }
 
-    private void RemoveProficiency(ProficiencyBaseDTO rowData)
+    private void RemoveProficiency(ProficiencyDTO rowData)
     {
         proficienciesDTO.RemoveAll(dto => dto.SkillName == rowData.SkillName && dto.SkillLevel == rowData.SkillLevel);
     }
 
-    private void ChangeProficiency(ProficiencyBaseDTO rowData, ProficiencyLevel selectedLevel)
+    private void ChangeProficiency(ProficiencyDTO rowData, ProficiencyLevel selectedLevel)
     {
         //proficiencyLevel = selectedLevel;
         proficienciesDTO.Single(dto => dto.SkillName == rowData.SkillName).SkillLevel = selectedLevel;
@@ -246,11 +246,11 @@
         var filteredEmployees = new List<Employee?>();
         do
         {
-            filteredEmployees = await Program.client.ProficiencyBasedSearchEngine(proficienciesDTO);
+            filteredEmployees = await Program.Client.ProficiencyBasedSearchEngine(proficienciesDTO);
             if (filteredEmployees.Count() == 0)
             {
                 hasSearchFoundEmployees = false;
-                filteredEmployees = await Program.client.ProficiencyBasedSearchFallback2(proficienciesDTO);
+                filteredEmployees = await Program.Client.ProficiencyBasedSearchFallback2(proficienciesDTO);
             }
             if (filteredEmployees.Count() == 0)
             {
@@ -269,7 +269,7 @@
 
         foreach (var employee in filteredEmployees)
         {
-            searchResult.AddRange(await Program.client.GetProficiencyAsync(employee.Id));
+            searchResult.AddRange(await Program.Client.GetProficiencyAsync(employee.Id));
         }
 
         PrepareTableData(searchResult);

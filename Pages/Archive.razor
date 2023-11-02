@@ -2,9 +2,8 @@
 
 <PageTitle>neox AG Mitarbeiterarchiv</PageTitle>
 
-@using SkillsDatabase
+@using SkillsBackend.Model
 @using SkillsBackend.Client
-@using Microsoft.EntityFrameworkCore
 @using Components
 @using System.Globalization
 @inject NavigationManager nav
@@ -81,7 +80,7 @@
         await base.OnInitializedAsync();
         try
         {
-            employees = await Program.client.GetDeletedEmployeesAsync();
+            employees = await Program.Client.GetDeletedEmployeesAsync();
             loading = false;
         }
         catch (Exception ex)

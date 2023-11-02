@@ -1,4 +1,4 @@
-﻿@using SkillsDatabase
+﻿@using SkillsBackend.Model
 @using System
 @using System.Threading;
 @using System.ComponentModel.DataAnnotations
@@ -36,7 +36,7 @@
                                     </MudSelect>
                                 </MudPaper>
                                 <MudPaper Elevation="0" Class="d-flex flex-auto" Width="10%" Style=" padding: .4rem 0 0 0;">
-									<MudIconButton uid="btn_addSkill" Style="height:3.3rem; width:100%;" Variant="Variant.Filled" Color="Color.Secondary" Icon="@Icons.Material.Filled.Add" @onclick="AddNewProficiency"></MudIconButton>
+                                    <MudIconButton uid="btn_addSkill" Style="height:3.3rem; width:100%;" Variant="Variant.Filled" Color="Color.Secondary" Icon="@Icons.Material.Filled.Add" @onclick="AddNewProficiency"></MudIconButton>
                                 </MudPaper>
                             </MudPaper>
                         </MudItem>
@@ -76,7 +76,7 @@
 @code {
     [CascadingParameter] MudDialogInstance MudDialog { get; set; }
 
-    List<ProficiencyBaseDTO> proficienciesDTO = new();
+    List<ProficiencyDTO> proficienciesDTO = new();
     private string newProficiency = String.Empty;
     private ProficiencyLevel proficiencyLevel = ProficiencyLevel.Basic;
     private bool isError = false;
@@ -96,7 +96,7 @@
         await base.OnInitializedAsync();
         try
         {
-            proficiencies = await Program.client.GetSkillsAsync();
+            proficiencies = await Program.Client.GetSkillsAsync();
         }
         catch (InvalidOperationException ex)
         {
@@ -147,7 +147,7 @@
         isError = false;
     }
 
-    private void RemoveProficiency(ProficiencyBaseDTO rowData)
+    private void RemoveProficiency(ProficiencyDTO rowData)
     {
         proficienciesDTO.RemoveAll(dto => dto.SkillName == rowData.SkillName && dto.SkillLevel == rowData.SkillLevel);
     }
@@ -176,7 +176,7 @@
         Employee employee = null;
         try
         {
-            employee = await Program.client.CreateEmployeeAsync(new EmployeeDTO_keyless(model.FirstName.Trim(), model.LastName.Trim(), model.Date!.Value.ToShortDateString(), true));
+            employee = await Program.Client.CreateEmployeeAsync(new EmployeeDTO(model.FirstName.Trim(), model.LastName.Trim(), model.Date!.Value.ToShortDateString(), true));
         }
         catch (Exception ex)
         {
@@ -187,7 +187,7 @@
         }
         foreach (var proficiencyDTO in proficienciesDTO)
         {
-            await Program.client.CreateProficiencyAsync(new SkillsBackend.ProficiencyBaseDTO_withOwner(proficiencyDTO.SkillName, proficiencyDTO.SkillLevel, employee.Id));
+            await Program.Client.CreateProficiencyAsync(new ProficiencyDTO(proficiencyDTO.SkillName, proficiencyDTO.SkillLevel) { OwnerId = employee.Id });
         }
         MudDialog.Close(DialogResult.Ok(true));
     }

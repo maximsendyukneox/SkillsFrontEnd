@@ -1,19 +1,14 @@
 using SkillsBackend.Client;
-using SkillsDatabase;
 using MudBlazor.Services;
-using System.Globalization;
 
 namespace SkillsFrontEnd;
 
 public class Program
 {
-#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor.
-    public static SkillsClient client { get; private set; }
-#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor.
+    public static SkillsClient Client { get; private set; } = new SkillsClient(Constants.API_BASE_URI, "Integration_Test");
+
     public static void Main(string[] args)
     {
-
-        client = new SkillsClient(Constants.API_BASE_URI, "Integration_Test");
         var builder = WebApplication.CreateBuilder(args);
       
 

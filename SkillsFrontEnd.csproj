@@ -1,18 +1,18 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
-	<RazorLanguageVersion>7</RazorLanguageVersion>
+    <RazorLanguageVersion>7</RazorLanguageVersion>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-	<ServiceWorkerAssetsManifest>service-worker-assets.js</ServiceWorkerAssetsManifest>
+    <ServiceWorkerAssetsManifest>service-worker-assets.js</ServiceWorkerAssetsManifest>
   </PropertyGroup>
 
   <ItemGroup>
     <Content Remove="Shared\NavMenu.razor" />
     <Content Remove="Shared\SurveyPrompt.razor" />
-	  <ServiceWorker Include="wwwroot\service-worker.js"
-					 PublishedContent="wwwroot\service-worker.published.js" />
+	<ServiceWorker Include="wwwroot\service-worker.js"
+		  PublishedContent="wwwroot\service-worker.published.js" />
   </ItemGroup>
 
   <ItemGroup>
@@ -20,16 +20,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="MudBlazor" Version="6.10.0" />
-    <PackageReference Include="Syncfusion.Blazor" Version="22.2.9" />
+    <PackageReference Include="MudBlazor" Version="6.11.0" />
+    <PackageReference Include="Syncfusion.Blazor" Version="23.1.43" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\skillsdotnet7\SkillsBackend.csproj" />
-  </ItemGroup>
-
-    <ItemGroup>
-    <ProjectReference Include="..\skillsdotnet7\skillsdotnet7.client\SkillsBackend.client.csproj" />
+    <ProjectReference Include="..\skillsdotnet7\SkillsBackend.Model\SkillsBackend.Model.csproj" />
+    <ProjectReference Include="..\skillsdotnet7\SkillsBackend.Client\SkillsBackend.Client.csproj" />
   </ItemGroup>
 
   <ItemGroup>
