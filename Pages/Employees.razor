@@ -28,9 +28,8 @@
         </MudHidden>
         <MudItem xs="12" Style="height: 100%;">
             <MudTable Items="@employees" Class="mud-theme-surface" RowsPerPage="25" Elevation="4" Loading="@loading" LoadingProgressColor="Color.Secondary" Dense="true" Filter="new Func<Employee,bool>(FilterFunc1)" @bind-SelectedItem="selectedEmployee">
-                <ToolBarContent>
+                <ToolBarContent>                          
                     <MudTextField uid="table_searchField" @bind-Value="searchString1" Immediate="true" Placeholder="Suchen" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium"></MudTextField>
-                    <MudSpacer />
                 </ToolBarContent>
                 <HeaderContent>
                     <MudTh uid="table_column_firstName">Vorname</MudTh>
@@ -43,6 +42,7 @@
                     <MudTd uid=@($"table_lastNameOf_{context.FirstName}_{context.LastName}_{context.Birthday.ToString("d",culture)}") DataLabel="Nachname">@context.LastName</MudTd>
                     <MudTd uid=@($"table_birthdayOf_{context.FirstName}_{context.LastName}_{context.Birthday.ToString("d",culture)}") DataLabel="Geburtsdatum">@context.Birthday.ToString("d",culture)</MudTd>
                     <MudTd uid="btn_editEmployee" DataLabel="Aktion">
+                        <MudSpacer/>
                         <MudTooltip Text="Bearbeiten">
                             <MudIconButton uid="@($"btn_editEmployee_{context.FirstName}_{context.LastName}_{context.Birthday.ToString("d",culture)}")" @onclick="@(()=>OpenEditEmployeeDialog(context))" Size="Size.Medium" Color="Color.Secondary" Icon="@Icons.Material.Filled.EditNote" />
                         </MudTooltip>
@@ -58,6 +58,9 @@
         </MudItem>
     </MudGrid>
 </MudContainer>
+
+<MudHidden Style="display:none" Breakpoint="Breakpoint.Xs" Invert="true" IsHiddenChanged="SetDialogSize">
+</MudHidden>
 
 <MudMessageBox uid="msgBox" @ref="deleteMessageBox">
     <TitleContent>
@@ -84,6 +87,7 @@
     private bool loading = true;
     private MudMessageBox deleteMessageBox { get; set; }
     private CultureInfo culture = new CultureInfo("de-DE");
+    private bool isFullScreen = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -122,7 +126,7 @@
 
     private async Task OpenCreateEmployeeDialog()
     {
-        var options = new DialogOptions { CloseOnEscapeKey = true, DisableBackdropClick = true };
+        var options = new DialogOptions { CloseOnEscapeKey = true, DisableBackdropClick = true, FullScreen = isFullScreen };
         var dialog = DialogService.Show<NewEmployee>("Neuer Mitarbeiter", options);
         var result = await dialog.Result;
         if (!result.Canceled)
@@ -133,7 +137,7 @@
 
     private async Task OpenEditEmployeeDialog(Employee employee)
     {
-        var options = new DialogOptions { CloseOnEscapeKey = true, DisableBackdropClick = true };
+        var options = new DialogOptions { CloseOnEscapeKey = true, DisableBackdropClick = true, FullScreen = isFullScreen };
         var parameters = new DialogParameters { ["Id"] = employee.Id.ToString() };
         var dialog = DialogService.Show<EditEmployeee>("Mitarbeiterdaten ändern", parameters, options);
         var result = await dialog.Result;
@@ -147,11 +151,16 @@
     {
         bool? result = await deleteMessageBox.Show();
         if (result == false || result == null)
-            return;
+            return;      
         else
         {
             await Program.Client.DeleteEmployeeAsync(employee.Id);
         }
         await OnInitializedAsync();
+    }
+
+    private void SetDialogSize ()
+    {
+        isFullScreen = !isFullScreen;
     }
 }

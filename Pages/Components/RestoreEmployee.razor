@@ -2,7 +2,7 @@
 @using System
 @using System.Threading;
 
-<MudDialog Class="pa-4">
+<MudDialog Class="pa-4 overflow-scroll">
     <DialogContent>
         <MudGrid>
             <MudItem xs="12">
@@ -18,14 +18,14 @@
                              <MudDatePicker uid="input_birthday" ReadOnly DateFormat="dd.MM.yyyy" Color="Color.Secondary" For="@(()=> model.Date)" Label="Geburtsdatum" @bind-Date="model.Date" MaxDate="DateTime.Now" Variant="Variant.Outlined" Editable="false" />
                         </MudItem>
                         <MudItem xs="12">
-                            <MudTable Items="@proficienciesDTO" Outlined="true" Style="padding:0;margin-top:1rem;">
+                            <MudTable Items="@proficienciesDTO" Breakpoint="Breakpoint.None" Outlined="true" Style="padding:0;margin-top:1rem;">
                                 <HeaderContent>
                                     <MudTh uid="table_column_skillName" Style="padding:10px 10px 10px 10px;">Kenntnis</MudTh>
                                     <MudTh uid="table_column_skillLevel" Style="padding:10px 10px 10px 10px;">Stufe</MudTh>
                                 </HeaderContent>
                                 <RowTemplate Context="ctx">
                                     <MudTd uid=@($"table_skillName_{ctx.SkillName}") Style="padding:10px 10px 10px 10px;" DataLabel="Kenntnis">@ctx.SkillName</MudTd>
-                                    <MudTd uid=@($"table_skillLevel_{ctx.SkillName}_{ctx.SkillLevel}") Style="padding:10px 10px 10px 10px;" DataLabel="Stufe">@ctx.SkillLevel</MudTd>                
+                                    <MudTd uid=@($"table_skillLevel_{ctx.SkillName}_{ctx.SkillLevel}") Style="padding:10px 10px 10px 10px;" DataLabel="Stufe">@ctx.SkillLevel.AsString()</MudTd>                
                                 </RowTemplate>
                             </MudTable>
                         </MudItem>
@@ -47,6 +47,15 @@
         </MudGrid>
     </DialogContent>
 </MudDialog>
+
+<style>
+    @@media only screen and (max-width: 600px) {
+
+        .mud-dialog {
+            padding: 0 !important;
+        }
+    }
+</style>
 
 
 @code {

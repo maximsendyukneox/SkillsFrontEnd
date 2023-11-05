@@ -4,8 +4,7 @@
 @using System.ComponentModel.DataAnnotations
 @using System.Linq
 
-
-<MudDialog Class="pa-4">
+<MudDialog Class="pa-4 overflow-scroll">
     <DialogContent>
         <MudGrid>
             <MudItem xs="12">
@@ -20,28 +19,24 @@
                         </MudItem>
                         <MudItem xs="12">
                             <MudDatePicker uid="input_birthday" @onkeyup="OnInputChanged" DateFormat="dd.MM.yyyy" Color="Color.Secondary" PickerOpened="OnDatePickerOpened" For="@(()=> model.Date)" Label="Geburtsdatum" @bind-Date="model.Date" MaxDate="DateTime.Now" Variant="Variant.Outlined" Editable="true" />
+                        </MudItem>                     
+                        <MudItem xs="6">
+                             <MudAutocomplete uid="input_skillName" T="string" Label="Kenntnis" Text="@newProficiency" Value="@newProficiency" ValueChanged="OnProficiencyChanged" SearchFunc="@SearchProficiency"
+                                              MaxItems="null" Variant="Variant.Outlined" Error="@isError" ErrorText="@error" CoerceText="true" CoerceValue="true" Style="" />
+                        </MudItem>
+                        <MudItem xs="6">
+                             <MudSelect uid="input_skillLevel" Label="Stufe" Variant="Variant.Outlined" @bind-Value="proficiencyLevel">
+                               @foreach (ProficiencyLevel profLevel in Enum.GetValues(typeof(ProficiencyLevel)))
+                               {
+                                    <MudSelectItem uid=@($"skillLevel_{profLevel}") Value="@profLevel">@profLevel.AsString()</MudSelectItem>
+                               }
+                             </MudSelect>
                         </MudItem>
                         <MudItem xs="12">
-                            <MudPaper Class="d-flex gap-2" Elevation="0">
-                                <MudPaper Elevation="0" Class="d-flex flex-auto" Width="45%">
-                                    <MudAutocomplete uid="input_skillName" T="string" Label="Kenntnis" Text="@newProficiency" Value="@newProficiency" ValueChanged="OnProficiencyChanged" SearchFunc="@SearchProficiency"
-                                                     MaxItems="null" Variant="Variant.Outlined" Error="@isError" ErrorText="@error" CoerceText="true" CoerceValue="true" Style="" />
-                                </MudPaper>
-                                <MudPaper Elevation="0" Class="d-flex flex-auto" Width="45%" MaxWidth="45%">
-                                    <MudSelect uid="input_skillLevel" Label="Stufe" Variant="Variant.Outlined" @bind-Value="proficiencyLevel">
-                                        @foreach (ProficiencyLevel profLevel in Enum.GetValues(typeof(ProficiencyLevel)))
-                                        {
-                                            <MudSelectItem uid=@($"skillLevel_{profLevel}") Value="@profLevel">@profLevel</MudSelectItem>
-                                        }
-                                    </MudSelect>
-                                </MudPaper>
-                                <MudPaper Elevation="0" Class="d-flex flex-auto" Width="10%" Style=" padding: .4rem 0 0 0;">
-                                    <MudIconButton uid="btn_addSkill" Style="height:3.3rem; width:100%;" Variant="Variant.Filled" Color="Color.Secondary" Icon="@Icons.Material.Filled.Add" @onclick="AddNewProficiency"></MudIconButton>
-                                </MudPaper>
-                            </MudPaper>
+                             <MudIconButton uid="btn_addSkill" Style="width:100%;" Variant="Variant.Filled" Color="Color.Secondary" Icon="@Icons.Material.Filled.Add" @onclick="AddNewProficiency"></MudIconButton>
                         </MudItem>
                         <MudItem xs="12">
-                            <MudTable Items="@proficienciesDTO" Outlined="true" Style="padding:0;margin-top:1rem;">
+                            <MudTable Items="@proficienciesDTO" Breakpoint="Breakpoint.None" Outlined="true" Style="padding:0;margin-top:1rem;">                              
                                 <HeaderContent>
                                     <MudTh uid="table_column_skillName" Style="padding:10px 10px 10px 10px;">Kenntnis</MudTh>
                                     <MudTh uid="table_column_skillLevel" Style="padding:10px 10px 10px 10px;">Stufe</MudTh>
@@ -49,7 +44,7 @@
                                 </HeaderContent>
                                 <RowTemplate Context="ctx">
                                     <MudTd uid=@($"table_skillName_{ctx.SkillName}") Style="padding:10px 10px 10px 10px;" DataLabel="Kenntnis">@ctx.SkillName</MudTd>
-                                    <MudTd uid=@($"table_skillLevel_{ctx.SkillName}_{ctx.SkillLevel}") Style="padding:10px 10px 10px 10px;" DataLabel="Stufe">@ctx.SkillLevel</MudTd>
+                                    <MudTd uid=@($"table_skillLevel_{ctx.SkillName}_{ctx.SkillLevel}") Style="padding:10px 10px 10px 10px;" DataLabel="Stufe">@ctx.SkillLevel.AsString()</MudTd>
                                     <MudTd Style="padding:10px 10px 10px 10px;" DataLabel=""><MudIconButton uid=@($"table_btnDelete_{ctx.SkillName}") Icon="@Icons.Material.Filled.Clear" aria-label="delete" @onclick="@(()=>RemoveProficiency(ctx))" Color="Color.Error"></MudIconButton></MudTd>
                                 </RowTemplate>
                             </MudTable>
@@ -73,6 +68,15 @@
     </DialogContent>
 </MudDialog>
 
+<style>
+    @@media only screen and (max-width: 600px) {
+
+        .mud-dialog {
+            padding: 0 !important;
+        }
+    }
+</style>
+
 @code {
     [CascadingParameter] MudDialogInstance MudDialog { get; set; }
 
@@ -88,7 +92,6 @@
     List<Proficiency> tableData = new();
     List<string> proficiencies = new();
     private EditContext editContext { get; set; }
-
 
     protected override async Task OnInitializedAsync()
     {

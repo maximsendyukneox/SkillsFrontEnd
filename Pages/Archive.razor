@@ -59,7 +59,8 @@
     </MudGrid>
 </MudContainer>
 
-
+<MudHidden Style="display:none" Breakpoint="Breakpoint.Xs" Invert="true" IsHiddenChanged="SetDialogSize">
+</MudHidden>
 
 
 
@@ -73,7 +74,7 @@
     private string ErrorText { get; set; } = String.Empty;
     private bool isException = false;
     private CultureInfo culture = new CultureInfo("de-DE");
-
+    private bool isFullScreen = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -91,7 +92,7 @@
 
     private async Task OpenRestoreEmployeeDialog(EmployeeDeleted employeeToRestore)
     {
-        var options = new DialogOptions { CloseOnEscapeKey = true, DisableBackdropClick = true };
+        var options = new DialogOptions { CloseOnEscapeKey = true, DisableBackdropClick = true, FullScreen = isFullScreen };
         var parameters = new DialogParameters { ["Id"] = employeeToRestore.Id.ToString() };
         var dialog = DialogService.Show<RestoreEmployee>("Mitarbeiter wiederherstellen", parameters, options);
         var result = await dialog.Result;
@@ -115,5 +116,10 @@
         if (name.Contains(searchString, StringComparison.OrdinalIgnoreCase))
             return true;
         return false;
+    }
+
+    private void SetDialogSize()
+    {
+        isFullScreen = !isFullScreen;
     }
 }
