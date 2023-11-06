@@ -5,12 +5,15 @@ namespace SkillsFrontEnd;
 
 public class Program
 {
-    public static SkillsClient Client { get; private set; } = new SkillsClient(Constants.API_BASE_URI, "Integration_Test");
+    private static SkillsClient? client = null;
+    public static SkillsClient Client { get => client!; }
 
     public static void Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
-      
+        var isAzureRelease = !builder.Environment.IsDevelopment();
+        var API_BASE_URI = isAzureRelease ? Constants.API_BASE_URI_AZURE : Constants.API_BASE_URI_local_https;
+        client = new SkillsClient(API_BASE_URI, "Integration_Test");
 
         // Add services to the container.
         builder.Services.AddMudServices();
@@ -42,15 +45,10 @@ public class Program
 
 internal class ClientTest
 {
-    private SkillsClient CreateClient()
-    {
-        var client = new SkillsClient(Constants.API_BASE_URI, "Integration_Test");
-        return client;
-    }
     public async void GetEmployeesAsync()
     {
         Console.WriteLine("Begin of Client Integration Test");
-        var client = CreateClient();
+        var client = new SkillsClient(Constants.API_BASE_URI_local_https, "Integration_Test");
         Console.WriteLine("CreateClient.GetEmployeesAsync Test");
         var emp = await client.GetEmployeeAsync(1);
         await Console.Out.WriteLineAsync(emp?.ToString());
