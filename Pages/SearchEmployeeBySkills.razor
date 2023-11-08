@@ -20,7 +20,7 @@
                         <MudSelect uid="input_skillLevel" Margin="Margin.Dense" Class="d-flex flex-shrink-1" T="ProficiencyLevel" Value="proficiencyLevel" Label="Stufe" Variant="Variant.Outlined" ValueChanged="OnProficiencyLvlChanged">
                             @foreach (ProficiencyLevel profLevel in Enum.GetValues(typeof(ProficiencyLevel)))
                             {
-                                <MudSelectItem Value="@profLevel">@profLevel</MudSelectItem>
+                                <MudSelectItem Value="@profLevel">@profLevel.AsString()</MudSelectItem>
                             }
                         </MudSelect>
                     </MudItem>
@@ -37,7 +37,7 @@
         </MudItem>
         
         <MudItem xs="12">
-            <MudTable Items="@proficienciesDTO" Dense="true" Elevation="4" Class="pa-4">
+            <MudTable Items="@requiredProficiencies" Dense="true" Elevation="4" Class="pa-4">
                 <HeaderContent>
                     <MudTh uid="table_column_skillName">Kenntnis</MudTh>
                     <MudTh uid="table_column_skillLevel">Stufe</MudTh>
@@ -49,7 +49,7 @@
                         <MudSelect Style="width:100%" Margin="Margin.Dense" T="ProficiencyLevel" Value="ctx.SkillLevel" Variant="Variant.Outlined" ValueChanged="@((selection)=>ChangeProficiency(ctx,selection))">
                             @foreach (ProficiencyLevel profLevel in Enum.GetValues(typeof(ProficiencyLevel)))
                             {
-                                <MudSelectItem Value="@profLevel">@profLevel</MudSelectItem>
+                                <MudSelectItem Value="@profLevel">@profLevel.AsString()</MudSelectItem>
                             }
                         </MudSelect>
                     </MudTd>
@@ -57,6 +57,12 @@
                 </RowTemplate>
             </MudTable>
         </MudItem>
+        @if (isException)
+          {
+            <MudItem xs="12">
+                  <MudAlert Severity="Severity.Warning">@exceptionMessage</MudAlert>
+            </MudItem>
+          }
         @if (!hasSearchFoundEmployees)
            {
             <MudItem xs="12">
@@ -64,7 +70,7 @@
             </MudItem>
            }
         <MudItem xs="12">
-            <MudTable Items="@tableData" Breakpoint="Breakpoint.None" Elevation="3" Class="" Loading="@loading" LoadingProgressColor="Color.Secondary" Filter="new Func<EmployeeTableData,bool>(FilterFunc1)">
+            <MudTable Items="@searchResult" Breakpoint="Breakpoint.None" Elevation="3" Class="" Loading="@loading" LoadingProgressColor="Color.Secondary" Filter="new Func<EmployeeTableData,bool>(FilterFunc1)">
                 <ToolBarContent>
                     <MudText uid="table_title" Typo="Typo.h6">Suchergebnisse</MudText>
                     <MudSpacer />
@@ -90,7 +96,7 @@
                     <MudTd DataLabel="Stufe">
                         @foreach (var skillLevel in context.SkillLevels)
                         {
-                            <MudText Style="font-size: inherit;">@skillLevel</MudText>
+                            <MudText Style="font-size: inherit;">@skillLevel.AsString()</MudText>
                         }
                     </MudTd>
                 </RowTemplate>
@@ -109,12 +115,13 @@
 </MudContainer>
 
 @code {
- 
-    List<ProficiencyDTO> proficienciesDTO = new();
-    List<Proficiency> searchResult = new List<Proficiency>();
+
+    List<ProficiencyDTO> requiredProficiencies = new();
     private ProficiencyLevel proficiencyLevel = ProficiencyLevel.Basic;
     private string proficiency = "";
     private bool isError = false;
+    private bool isException = false;
+    private string exceptionMessage = "";
     private string error = "";
     private string searchString = "";
     private Employee selectedEmployee = null;
@@ -123,7 +130,7 @@
     private List<string> proficiencies = new();
     private bool isNoRecordsContentDisplayed = false;
     private bool hasSearchFoundEmployees = true;
-    List<EmployeeTableData> tableData = new List<EmployeeTableData>();
+    List<EmployeeTableData> searchResult = new List<EmployeeTableData>();
     private CultureInfo culture = new CultureInfo("de-DE");
 
     protected override async Task OnInitializedAsync()
@@ -144,13 +151,13 @@
         if (string.IsNullOrEmpty(proficiency))
             return;
 
-        if ((proficienciesDTO.Any(p => p.SkillName == proficiency)))
+        if ((requiredProficiencies.Any(p => p.SkillName == proficiency)))
         {
             error = "Kenntnis bereits hinzugefügt";
             isError = true;
             return;
         };
-        proficienciesDTO.Add(new(proficiency, proficiencyLevel));
+        requiredProficiencies.Add(new(proficiency, proficiencyLevel));
         proficiency = String.Empty;
         isError = false;
     }
@@ -169,14 +176,12 @@
 
     private void RemoveProficiency(ProficiencyDTO rowData)
     {
-        proficienciesDTO.RemoveAll(dto => dto.SkillName == rowData.SkillName && dto.SkillLevel == rowData.SkillLevel);
+        requiredProficiencies.RemoveAll(dto => dto.SkillName == rowData.SkillName && dto.SkillLevel == rowData.SkillLevel);
     }
 
     private void ChangeProficiency(ProficiencyDTO rowData, ProficiencyLevel selectedLevel)
     {
-        //proficiencyLevel = selectedLevel;
-        proficienciesDTO.Single(dto => dto.SkillName == rowData.SkillName).SkillLevel = selectedLevel;
-
+        requiredProficiencies.Single(dto => dto.SkillName == rowData.SkillName).SkillLevel = selectedLevel;
     }
 
     private async Task<IEnumerable<string>> SearchProficiency(string value)
@@ -203,76 +208,24 @@
         return false;
     }
 
-    private void PrepareTableData (List<Proficiency> searchResult)
-    {
-        // unstrukturierte ergebnisdaten aus der suche strukturieren zum anzeigen in tabelle
-        tableData.RemoveAll(data=>true);
-        foreach (var employeeProficiency in searchResult)
-        {
-            // nachschauen ob mitarbeiter bereits in der liste zum anzeigen in der tabelle
-            EmployeeTableData empl = tableData.Find(employee =>
-                employee.FirstName == employeeProficiency.Owner.FirstName &&
-                employee.LastName == employeeProficiency.Owner.LastName &&
-                employee.Birthday == employeeProficiency.Owner.Birthday
-            );
-
-            if (empl == null)
-            {
-                //mitarbeiter noch nicht in der liste, füge neuen eintrag für ihn hinzu
-                EmployeeTableData employeeWithSkills = new EmployeeTableData();
-                employeeWithSkills.FirstName = employeeProficiency.Owner.FirstName;
-                employeeWithSkills.LastName = employeeProficiency.Owner.LastName;
-                employeeWithSkills.Birthday = employeeProficiency.Owner.Birthday;
-                employeeWithSkills.Skills.Add(employeeProficiency.Skill.Name);
-                employeeWithSkills.SkillLevels.Add(employeeProficiency.Level);
-                tableData.Add(employeeWithSkills);
-            }
-            else
-            {
-                // mitarbeiter bereits in der liste, füge kenntnis und skillevel hinzu
-                empl.Skills.Add(employeeProficiency.Skill.Name);
-                empl.SkillLevels.Add(employeeProficiency.Level);
-            }
-        }
-    }
-
     private async Task SearchEmployees()
     {
         hasSearchFoundEmployees = true;
         isNoRecordsContentDisplayed = true;
         loading = true;
-        searchResult.RemoveAll(p => true);
-        bool exit = false;
-        var filteredEmployees = new List<Employee?>();
-        do
+        searchResult.Clear();
+        isException = false;
+      
+        try
         {
-            filteredEmployees = await Program.Client.ProficiencyBasedSearchEngine(proficienciesDTO);
-            if (filteredEmployees.Count() == 0)
-            {
-                hasSearchFoundEmployees = false;
-                filteredEmployees = await Program.Client.ProficiencyBasedSearchFallback2(proficienciesDTO);
-            }
-            if (filteredEmployees.Count() == 0)
-            {
-                hasSearchFoundEmployees = false;
-                foreach (var skill in proficienciesDTO)
-                {
-                    skill.SkillLevel -= 1;
-                }
-            }
-            else
-            {
-                exit = true;
-            }
+            searchResult = await Program.Client.SkillBasedSearchAsync(requiredProficiencies);
+            loading = false;
         }
-        while (!exit);
-
-        foreach (var employee in filteredEmployees)
+        catch (Exception ex)
         {
-            searchResult.AddRange(await Program.Client.GetProficiencyAsync(employee.Id));
+            isException = true;
+            exceptionMessage = ex.Message;
+            StateHasChanged();
         }
-
-        PrepareTableData(searchResult);
-        loading = false;
     }
 }
