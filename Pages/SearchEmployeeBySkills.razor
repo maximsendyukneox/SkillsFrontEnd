@@ -66,7 +66,21 @@
         @if (!hasSearchFoundEmployees)
            {
             <MudItem xs="12">
-                  <MudAlert Severity="Severity.Warning">Keine Suchtreffer für die gewählten Mindestanforderungen, nächstbeste Mitarbeiter werden angezeigt  </MudAlert>
+                  <MudAlert Severity="Severity.Warning">Keine Suchtreffer für die gewählten Mindestanforderungen, die Suchanforderungen wurden reduziert. Nächstbeste Mitarbeiter werden angezeigt
+                    <br> 
+                    
+                    @for (int i = 0; i < requiredProficiencies.Count; i++)
+                    {
+                        if (i < searchResult[0].requiredSkills.Count)
+                        {
+                            <p style="display:block">@requiredProficiencies[i].SkillName (@requiredProficiencies[i].SkillLevel.AsString()) -> @searchResult[0].requiredSkills[i].SkillLevel.AsString()</p>
+                        }
+                        else
+                        {
+                            <p style="display:block">@requiredProficiencies[i].SkillName -> entfernt</p>
+                        }
+                    }
+                </MudAlert>
             </MudItem>
            }
         <MudItem xs="12">
@@ -215,11 +229,18 @@
         loading = true;
         searchResult.Clear();
         isException = false;
-      
+
         try
         {
             searchResult = await Program.Client.SkillBasedSearchAsync(requiredProficiencies);
             loading = false;
+            if (searchResult.Count > 0 && !searchResult[0].FoundOnFirstSearchLoop)
+            {
+                hasSearchFoundEmployees = false;
+                StateHasChanged();
+                // requiredProficiencies.Clear();
+                // requiredProficiencies = searchResult[0].requiredSkills;
+            }
         }
         catch (Exception ex)
         {
