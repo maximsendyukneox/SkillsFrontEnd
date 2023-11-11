@@ -45,7 +45,14 @@
                                 </HeaderContent>
                                 <RowTemplate Context="ctx">
                                     <MudTd uid=@($"table_skillName_{ctx.SkillName}") Style="padding:10px 10px 10px 10px;" DataLabel="Kenntnis">@ctx.SkillName</MudTd>
-                                    <MudTd uid=@($"table_skillLevel_{ctx.SkillName}_{ctx.SkillLevel}") Style="padding:10px 10px 10px 10px;" DataLabel="Stufe">@ctx.SkillLevel.AsString()</MudTd>
+                                    <MudTd uid=@($"table_skillLevel_{ctx.SkillName}_{ctx.SkillLevel}") Style="padding:10px 10px 10px 10px;" DataLabel="Stufe">
+                                        <MudSelect Style="width:100%" Margin="Margin.Dense" T="ProficiencyLevel" Value="ctx.SkillLevel" Variant="Variant.Outlined" ValueChanged="@((selection)=>ChangeProficiency(ctx,selection))">
+                                            @foreach (ProficiencyLevel profLevel in Enum.GetValues(typeof(ProficiencyLevel)))
+                                            {
+                                                <MudSelectItem Value="@profLevel">@profLevel.AsString()</MudSelectItem>
+                                            }
+                                        </MudSelect>
+                                    </MudTd>
                                     <MudTd Style="padding:10px 10px 10px 10px;" DataLabel=""><MudIconButton uid=@($"table_btnDelete_{ctx.SkillName}") Icon="@Icons.Material.Filled.Clear" aria-label="delete" @onclick="@(()=>RemoveProficiency(ctx))" Color="Color.Error"></MudIconButton></MudTd>
                                 </RowTemplate>
                             </MudTable>
@@ -98,6 +105,7 @@
     private List<string> skills = new();
     private List<ProficiencyDTO> proficienciesToAdd = new();
     private List<Proficiency> proficienciesToDelete = new();
+    private List<Proficiency> proficienciesToUpdate = new();
     private MudMessageBox deleteMessageBox { get; set; }
     private EditContext editContext { get; set; }
     [CascadingParameter] MudDialogInstance MudDialog { get; set; }
@@ -152,6 +160,25 @@
         }
     }
 
+    private void ChangeProficiency(ProficiencyDTO rowData, ProficiencyLevel selectedLevel)
+    {
+        var proficiencyToUpdate = employeeProficiencies.Find(p=>p.Skill.Name == rowData.SkillName);
+        if (proficiencyToUpdate is not null)
+        {
+            var prof = proficienciesToUpdate.Find(p => p.Skill.Name == rowData.SkillName);
+            if (prof is not null)
+            {
+                prof.Level = selectedLevel;
+            }
+            else
+            {
+                proficiencyToUpdate.Level = selectedLevel;
+                proficienciesToUpdate.Add(proficiencyToUpdate);
+            }
+        }
+            proficienciesDTO.Single(p=>p.SkillName == rowData.SkillName).SkillLevel = selectedLevel; // update view
+    }
+
     private async Task DeleteEmployee()
     {
         bool? result = await deleteMessageBox.Show();
@@ -181,37 +208,40 @@
 
     private async Task SaveChanges(EditContext context)
     {
-        if (!(employee.FirstName == model.FirstName && employee.LastName == model.LastName)) // no change was done by user
-        {
-            try
+        try{
+            if (!(employee.FirstName == model.FirstName && employee.LastName == model.LastName)) // no change was done by user
             {
                 await Program.Client.UpdateEmployeeAsync(new EmployeeDTO(model.FirstName, model.LastName, model.Date!.Value.ToShortDateString()) { Id = Convert.ToInt32(Id) });
             }
-            catch (Exception ex)
+            foreach (var proficiency in proficienciesToAdd)
             {
-                isException = true;
-                ErrorText = ex.Message;
-                StateHasChanged();
-                return;
-            }
-        } 
-        foreach (var proficiency in proficienciesToAdd)
-        {
-            await Program.Client.CreateProficiencyAsync
-            (
-                new ProficiencyDTO
+                await Program.Client.CreateProficiencyAsync
                 (
-                    proficiency.SkillName,
-                    proficiency.SkillLevel
-                )
-                    { OwnerId = employee.Id }
-            );
+                    new ProficiencyDTO
+                    (
+                        proficiency.SkillName,
+                        proficiency.SkillLevel
+                    )
+                        { OwnerId = employee.Id }
+                );
+            }
+            foreach (var proficiency in proficienciesToUpdate)
+            {
+                await Program.Client.UpdateProficiencyAsync(proficiency);
+            }
+            foreach (var proficiency in proficienciesToDelete)
+            {
+                await Program.Client.DeleteProficiencyAsync(proficiency.Id);
+            }
+            MudDialog.Close(DialogResult.Ok(true));
         }
-        foreach (var proficiency in proficienciesToDelete)
+        catch (Exception ex)
         {
-            await Program.Client.DeleteProficiencyAsync(proficiency.Id);
+            isException = true;
+            ErrorText = ex.Message;
+            StateHasChanged();
+            return;
         }
-        MudDialog.Close(DialogResult.Ok(true));
     }
 
     private void OnInputChanged(KeyboardEventArgs e)

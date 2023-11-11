@@ -32,8 +32,8 @@
                     <MudTextField uid="table_searchField" @bind-Value="searchString1" Immediate="true" Placeholder="Suchen" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium"></MudTextField>
                 </ToolBarContent>
                 <HeaderContent>
-                    <MudTh uid="table_column_firstName">Vorname</MudTh>
-                    <MudTh uid="table_column_lastName">Nachname</MudTh>
+                    <MudTh uid="table_column_firstName"><MudTableSortLabel SortBy="new Func<Employee, object>(x=>x.FirstName)">Vorname</MudTableSortLabel></MudTh>
+                    <MudTh uid="table_column_lastName"><MudTableSortLabel SortBy="new Func<Employee, object>(x=>x.LastName)">Nachname</MudTableSortLabel></MudTh>
                     <MudTh uid="table_column_birthday">Geburtsdatum</MudTh>
                     <MudTh uid="table_column_action">Aktion</MudTh>
                 </HeaderContent>
