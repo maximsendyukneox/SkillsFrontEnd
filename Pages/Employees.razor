@@ -43,10 +43,10 @@
                     <MudTd uid=@($"table_birthdayOf_{context.FirstName}_{context.LastName}_{context.Birthday.ToString("d",culture)}") DataLabel="Geburtsdatum">@context.Birthday.ToString("d",culture)</MudTd>
                     <MudTd uid="btn_editEmployee" DataLabel="Aktion">
                         <MudSpacer/>
-                        <MudTooltip Text="Bearbeiten">
+                        <MudTooltip Text="Bearbeiten" ShowOnHover="true" ShowOnFocus="false">
                             <MudIconButton uid="@($"btn_editEmployee_{context.FirstName}_{context.LastName}_{context.Birthday.ToString("d",culture)}")" @onclick="@(()=>OpenEditEmployeeDialog(context))" Size="Size.Medium" Color="Color.Secondary" Icon="@Icons.Material.Filled.EditNote" />
                         </MudTooltip>
-                        <MudTooltip Text="Löschen">
+                        <MudTooltip Text="Löschen" ShowOnHover="true" ShowOnFocus="false">
                             <MudIconButton uid="@($"btn_deleteEmployee_{context.FirstName}_{context.LastName}_{context.Birthday.ToString("d",culture)}")" @onclick="@(()=>DeleteEmployee(context))" Size="Size.Small" Color="Color.Error" Icon="@Icons.Material.Filled.DeleteForever" />
                         </MudTooltip>
                     </MudTd>
