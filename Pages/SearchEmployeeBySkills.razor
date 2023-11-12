@@ -165,13 +165,13 @@
         if (string.IsNullOrEmpty(proficiency))
             return;
 
-        if ((requiredProficiencies.Any(p => p.SkillName == proficiency)))
+        if ((requiredProficiencies.Any(p => p.SkillName == proficiency.Trim())))
         {
             error = "Kenntnis bereits hinzugefügt";
             isError = true;
             return;
         };
-        requiredProficiencies.Add(new(proficiency, proficiencyLevel));
+        requiredProficiencies.Add(new(proficiency.Trim(), proficiencyLevel));
         proficiency = String.Empty;
         isError = false;
     }
@@ -224,6 +224,8 @@
 
     private async Task SearchEmployees()
     {
+        if (requiredProficiencies.Count == 0)
+            return;
         hasSearchFoundEmployees = true;
         isNoRecordsContentDisplayed = true;
         loading = true;
@@ -238,8 +240,6 @@
             {
                 hasSearchFoundEmployees = false;
                 StateHasChanged();
-                // requiredProficiencies.Clear();
-                // requiredProficiencies = searchResult[0].requiredSkills;
             }
         }
         catch (Exception ex)
