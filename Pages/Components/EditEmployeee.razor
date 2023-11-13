@@ -50,9 +50,9 @@
                                     <MudTd uid=@($"table_skillName_{ctx.SkillName}") Style="padding:10px 10px 10px 10px;" DataLabel="Kenntnis">@ctx.SkillName</MudTd>
                                     <MudTd uid=@($"table_skillLevel_{ctx.SkillName}_{ctx.SkillLevel}") Style="padding:10px 10px 10px 10px;" DataLabel="Stufe">
                                         <MudSelect Style="width:100%" Margin="Margin.Dense" T="ProficiencyLevel" Value="ctx.SkillLevel" Variant="Variant.Outlined" ValueChanged="@((selection)=>ChangeProficiency(ctx,selection))">
-                                            @foreach (ProficiencyLevel profLevel in Enum.GetValues(typeof(ProficiencyLevel)))
+                                           @foreach (ProficiencyLevel profLevel in Enum.GetValues(typeof(ProficiencyLevel)))
                                             {
-                                                <MudSelectItem Value="@profLevel">@profLevel.AsString()</MudSelectItem>
+                                                <MudSelectItem uid=@($"skillLevel_{profLevel}") Value="@profLevel">@profLevel.AsString()</MudSelectItem>
                                             }
                                         </MudSelect>
                                     </MudTd>
