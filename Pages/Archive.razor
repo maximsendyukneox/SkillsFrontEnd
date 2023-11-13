@@ -83,6 +83,7 @@
         {
             employees = await Program.Client.GetDeletedEmployeesAsync();
             loading = false;
+            StateHasChanged();
         }
         catch (Exception ex)
         {
