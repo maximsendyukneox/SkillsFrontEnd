@@ -67,7 +67,7 @@
            {
             <MudItem xs="12">
                   <MudAlert Severity="Severity.Warning">Keine Suchtreffer für die gewählten Mindestanforderungen, die Suchanforderungen wurden reduziert. Nächstbeste Mitarbeiter werden angezeigt
-                    <br> 
+                   @*  <br> 
                     
                     @for (int i = 0; i < requiredProficiencies.Count; i++)
                     {
@@ -79,7 +79,7 @@
                         {
                             <p style="display:block">@requiredProficiencies[i].SkillName -> entfernt</p>
                         }
-                    }
+                    } *@
                 </MudAlert>
             </MudItem>
            }
@@ -234,9 +234,10 @@
 
         try
         {
-            searchResult = await Program.Client.SkillBasedSearchAsync(requiredProficiencies);
+            var response = await Program.Client.SkillBasedSearchAsync(requiredProficiencies);
+            searchResult = response.Item1;
             loading = false;
-            if (searchResult.Count > 0 && !searchResult[0].FoundOnFirstSearchLoop)
+            if (searchResult.Count > 0 && !response.Item2)
             {
                 hasSearchFoundEmployees = false;
                 StateHasChanged();
