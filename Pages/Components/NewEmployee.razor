@@ -3,6 +3,8 @@
 @using System.Threading;
 @using System.ComponentModel.DataAnnotations
 @using System.Linq
+@using Components
+@inject IDialogService DialogService
 
 <MudDialog Class="pa-4 overflow-scroll">
     <DialogContent>
@@ -68,6 +70,7 @@
     </DialogContent>
 </MudDialog>
 
+
 <style>
     @@media only screen and (max-width: 600px) {
 
@@ -79,7 +82,6 @@
 
 @code {
     [CascadingParameter] MudDialogInstance MudDialog { get; set; }
-
     List<ProficiencyDTO> proficienciesDTO = new();
     private string newProficiency = String.Empty;
     private ProficiencyLevel proficiencyLevel = ProficiencyLevel.Basic;
@@ -172,8 +174,25 @@
         MudDialog.Cancel();
     }
 
+    private async Task CheckUnsavedProficiency()
+    {
+        if (newProficiency.Trim() != "" && proficienciesDTO.Find(p=>p.SkillName == newProficiency.Trim()) == null)
+        {
+            var options = new DialogOptions { CloseOnEscapeKey = false, DisableBackdropClick = true };
+            var parameters = new DialogParameters { ["Skill"] = newProficiency };
+            var dialog = DialogService.Show<AddSkillsDialog>("Achtung",parameters, options);
+            var result = await dialog.Result;
+            if (!result.Canceled)
+            {
+                // Kenntnis übernehmen & speichern
+                proficienciesDTO.Add(new(newProficiency.Trim(), proficiencyLevel));
+            }
+        }
+    }
+
     private async Task SaveEmployee()
     {
+        await CheckUnsavedProficiency();
         isError = false;
         isException = false;
         Employee employee = null;

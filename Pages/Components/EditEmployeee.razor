@@ -3,7 +3,10 @@
 @using System.Threading;
 @using System.ComponentModel.DataAnnotations
 @using System.Linq
+@using Components
 @inject NavigationManager nav
+@inject IDialogService DialogService
+
 
 <MudDialog Class="pa-4 overflow-scroll">
     <DialogContent>
@@ -179,6 +182,23 @@
             proficienciesDTO.Single(p=>p.SkillName == rowData.SkillName).SkillLevel = selectedLevel; // update view
     }
 
+    private async Task CheckUnsavedProficiency()
+    {
+        if (newProficiency.Trim() != "" && proficienciesDTO.Find(p => p.SkillName == newProficiency.Trim()) == null)
+        {
+            var options = new DialogOptions { CloseOnEscapeKey = false, DisableBackdropClick = true };
+            var parameters = new DialogParameters { ["Skill"] = newProficiency };
+            var dialog = DialogService.Show<AddSkillsDialog>("Achtung", parameters, options);
+            var result = await dialog.Result;
+            if (!result.Canceled)
+            {
+                // Kenntnis übernehmen & speichern
+                proficienciesDTO.Add(new(newProficiency.Trim(), proficiencyLevel));
+                proficienciesToAdd.Add(new(newProficiency.Trim(), proficiencyLevel));
+            }
+        }
+    }
+
     private async Task DeleteEmployee()
     {
         bool? result = await deleteMessageBox.Show();
@@ -208,6 +228,7 @@
 
     private async Task SaveChanges(EditContext context)
     {
+        await CheckUnsavedProficiency();
         try{
             if (!(employee.FirstName == model.FirstName && employee.LastName == model.LastName)) // no change was done by user
             {
