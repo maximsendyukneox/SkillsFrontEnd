@@ -33,7 +33,7 @@
                 </ToolBarContent>
                 <HeaderContent>
                     <MudTh uid="table_column_firstName"><MudTableSortLabel SortBy="new Func<Employee, object>(x=>x.FirstName)">Vorname</MudTableSortLabel></MudTh>
-                    <MudTh uid="table_column_lastName"><MudTableSortLabel SortBy="new Func<Employee, object>(x=>x.LastName)">Nachname</MudTableSortLabel></MudTh>
+                    <MudTh uid="table_column_lastName"><MudTableSortLabel InitialDirection="SortDirection.Ascending" SortBy="new Func<Employee, object>(x=>x.LastName)">Nachname</MudTableSortLabel></MudTh>
                     <MudTh uid="table_column_birthday">Geburtsdatum</MudTh>
                     <MudTh uid="table_column_action">Aktion</MudTh>
                 </HeaderContent>
@@ -95,7 +95,7 @@
         try
         {
             employees = await Program.Client.GetEmployeesAsync();
-            loading = false;
+            loading = false; 
         }
         catch (InvalidOperationException ex)
         {
